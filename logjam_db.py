@@ -6,8 +6,10 @@ import hashlib
 import threading
 import hmac
 
-# ponytail: local SQLite file, override with LOGJAM_DB_PATH if needed
-DB_PATH = os.environ.get("LOGJAM_DB_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "logjam_data.sqlite"))
+# ponytail: SQLite in home dir or local override
+DB_PATH = os.environ.get("LOGJAM_DB_PATH", os.path.expanduser("~/logjam_data.sqlite"))
+if not os.path.isabs(DB_PATH):
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), DB_PATH)
 _LOCK = threading.Lock()
 
 def get_db():

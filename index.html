@@ -849,7 +849,7 @@
 
         <div class="input-group" style="margin-top: 6px;">
             <label>FastAPI / Cloud Server URL</label>
-            <input type="text" class="input-field" id="setting-server-url" placeholder="http://192.168.1.200:8000">
+            <input type="text" class="input-field" id="setting-server-url" placeholder="https://customs-wins-wallace-ultimately.trycloudflare.com">
         </div>
 
         <div id="settings-account-sec">
@@ -960,7 +960,7 @@ const API_CONFIG = {
                 return window.location.origin;
             }
         }
-        return "http://192.168.1.200:8000";
+        return "https://customs-wins-wallace-ultimately.trycloudflare.com";
     })(),
     AUTH:        { method: "POST", path: "/api/user/auth" },
     GET_USER:    { method: "GET",  path: "/api/user" },
