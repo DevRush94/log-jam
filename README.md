@@ -14,3 +14,4 @@ Open `http://localhost:8000` or double click `index.html`.
 - Full 8-station production line: Spawner -> Conveyor -> Saws -> Sorter -> Stacks -> Crane -> Docks -> Trucks.
 - 13 upgrades, 5 wood tiers, prestige Golden Acorns, 17+ achievements, daily chest, offline earnings.
 - Dual storage: local `localStorage` guest save + cloud sync (`/api/user/auth`, `/api/user/save`) matching Wings of Fire architecture.
+
