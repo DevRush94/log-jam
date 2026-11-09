@@ -6,25 +6,19 @@
     <title>Log Jam: Mill Empire</title>
     <style>
         :root {
-            --bg-dark: #0f131c;
-            --panel-bg: rgba(20, 25, 37, 0.95);
+            --bg-color: #0f131c;
+            --panel-bg: rgba(18, 24, 38, 0.96);
             --panel-border: rgba(255, 255, 255, 0.12);
+            --cash-green: #22c55e;
+            --cash-glow: rgba(34, 197, 94, 0.45);
             --gold: #ffcf33;
             --gold-glow: rgba(255, 207, 51, 0.45);
-            --gold-dark: #b38600;
             --wood-bark: #4a2f1b;
             --wood-mid: #85532a;
             --wood-light: #d69854;
-            --wood-board: #613b1f;
-            --emerald: #38a169;
-            --emerald-hover: #48bb78;
-            --emerald-glow: rgba(72, 187, 120, 0.5);
-            --ruby: #e53e3e;
-            --blue: #3182ce;
-            --purple: #805ad5;
-            --text-main: #f7fafc;
-            --text-sub: #a0aec0;
-            --text-muted: #718096;
+            --truck-orange: #ea580c;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
             --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
@@ -41,7 +35,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: var(--bg-dark);
+            background: var(--bg-color);
             font-family: var(--font-family);
             color: var(--text-main);
         }
@@ -54,7 +48,6 @@
             overflow: hidden;
         }
 
-        /* Canvas Viewport */
         #canvas-wrapper {
             position: relative;
             flex: 1;
@@ -79,289 +72,183 @@
         /* Top HUD Bar */
         .hud-top {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
+            top: 12px;
+            left: 12px;
+            right: 12px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             z-index: 10;
             pointer-events: none;
-            gap: 10px;
+            gap: 12px;
         }
 
-        .hud-left-group {
+        .hud-left {
             display: flex;
             flex-direction: column;
             gap: 8px;
             pointer-events: auto;
         }
 
-        .hud-pill-row {
+        .hud-row {
             display: flex;
             gap: 8px;
+            align-items: center;
             flex-wrap: wrap;
-            align-items: center;
         }
 
-        /* Wood Tier Banner with Progress */
-        .wood-tier-banner {
-            background: linear-gradient(135deg, #7a4620, #4d2b12);
-            border: 2px solid var(--wood-light);
-            box-shadow: 0 4px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.25);
-            border-radius: 14px;
-            padding: 6px 12px;
+        /* Clean Cash Pill matching YouTube Short */
+        .cash-pill-box {
+            background: rgba(15, 23, 42, 0.92);
+            border: 2.5px solid #10b981;
+            border-radius: 20px;
+            padding: 8px 20px;
             display: flex;
-            flex-direction: column;
-            gap: 3px;
-            min-width: 180px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .wood-tier-banner:hover {
-            transform: translateY(-2px);
-        }
-        .wood-tier-header {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            font-size: 13px;
-            font-weight: 800;
-            color: #ffe082;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+            gap: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 15px rgba(16, 185, 129, 0.3);
+            pointer-events: auto;
+            min-width: 150px;
+            transition: transform 0.12s ease;
         }
-        .wood-mult-badge {
-            background: rgba(0,0,0,0.35);
-            padding: 1px 6px;
+        .cash-pill-box.bounce {
+            transform: scale(1.1);
+        }
+        .cash-icon-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 900;
+            padding: 2px 8px;
             border-radius: 8px;
+            letter-spacing: -0.5px;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
+        }
+        .cash-digits {
+            font-size: 24px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+        }
+        .cash-rate-tag {
             font-size: 11px;
-            color: var(--gold);
-        }
-        .wood-progress-track {
-            width: 100%;
-            height: 6px;
-            background: rgba(0,0,0,0.45);
-            border-radius: 4px;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .wood-progress-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #f6ad55, #ecc94b);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-        .wood-next-label {
-            font-size: 10px;
-            color: rgba(255,255,255,0.75);
-            font-weight: 600;
+            font-weight: 800;
+            color: #34d399;
+            margin-top: 1px;
         }
 
-        .hud-badge {
-            background: rgba(18, 22, 33, 0.9);
+        /* Pill Buttons */
+        .hud-pill {
+            background: rgba(18, 24, 38, 0.9);
             border: 1px solid var(--panel-border);
-            padding: 6px 12px;
-            border-radius: 14px;
+            padding: 7px 14px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             gap: 6px;
             font-size: 13px;
             font-weight: 800;
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             cursor: pointer;
             transition: transform 0.2s, background 0.2s;
         }
-        .hud-badge:hover {
+        .hud-pill:hover {
             transform: translateY(-2px);
-            background: rgba(28, 35, 52, 0.95);
+            background: rgba(30, 41, 59, 0.95);
         }
-
-        .hud-badge.acorns {
+        .hud-pill.tier {
+            background: linear-gradient(135deg, #78350f, #451a03);
+            border-color: #d97706;
+            color: #fde68a;
+        }
+        .hud-pill.acorns {
             color: var(--gold);
-            border-color: rgba(255, 207, 51, 0.4);
-            box-shadow: 0 4px 14px rgba(255, 207, 51, 0.15);
+            border-color: var(--gold-glow);
         }
-        .hud-badge.leaderboard {
-            color: #ffe082;
-            border-color: rgba(255, 224, 130, 0.4);
+        .hud-pill.leaderboard {
+            color: #fef08a;
+            border-color: rgba(254, 240, 138, 0.4);
         }
-        .hud-badge.sync-status {
+        .hud-pill.sync-status {
             font-size: 11px;
-            font-weight: 600;
             color: var(--text-sub);
             cursor: default;
         }
+
         .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #48bb78;
-            box-shadow: 0 0 6px #48bb78;
+            background: #22c55e;
+            box-shadow: 0 0 6px #22c55e;
         }
         .status-dot.syncing {
-            background: #ecc94b;
-            box-shadow: 0 0 6px #ecc94b;
+            background: #eab308;
+            box-shadow: 0 0 6px #eab308;
             animation: pulse-dot 1s infinite;
         }
         .status-dot.offline {
-            background: #f56565;
-            box-shadow: 0 0 6px #f56565;
+            background: #ef4444;
+            box-shadow: 0 0 6px #ef4444;
         }
         @keyframes pulse-dot {
             0%, 100% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.3); opacity: 0.6; }
         }
 
-        /* Top Right Coin Bank */
-        .hud-coin-box {
-            background: linear-gradient(135deg, rgba(22, 28, 44, 0.95), rgba(13, 17, 27, 0.95));
-            border: 2px solid var(--gold);
-            border-radius: 16px;
-            padding: 8px 18px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 16px rgba(255, 207, 51, 0.25);
-            pointer-events: auto;
-            min-width: 160px;
-            transition: transform 0.12s ease;
-        }
-        .hud-coin-box.bounce {
-            transform: scale(1.08);
-        }
-        .coin-val {
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--gold);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            letter-spacing: 0.5px;
-            text-shadow: 0 2px 8px rgba(255, 207, 51, 0.4);
-        }
-        .income-rate {
-            font-size: 12px;
-            font-weight: 700;
-            color: #68d391;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        /* Station Inspector Card (Tap anywhere on machine to open) */
-        #station-inspector {
+        /* In-Canvas Traffic Jam Alert Banner */
+        #traffic-alert {
             position: absolute;
             top: 76px;
             left: 50%;
             transform: translateX(-50%) translateY(-150%);
-            background: rgba(18, 24, 38, 0.95);
-            border: 2px solid var(--gold);
-            border-radius: 16px;
-            padding: 12px 18px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: 2px solid #fff;
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-size: 13px;
+            font-weight: 900;
+            color: #fff;
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
+            z-index: 15;
             display: flex;
             align-items: center;
-            gap: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 20px rgba(255, 207, 51, 0.2);
-            z-index: 25;
-            backdrop-filter: blur(12px);
-            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            max-width: 90vw;
+            gap: 8px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
         }
-        #station-inspector.show {
+        #traffic-alert.show {
             transform: translateX(-50%) translateY(0);
         }
-        .inspector-icon {
-            font-size: 28px;
-            background: rgba(255, 207, 51, 0.12);
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid var(--gold-glow);
-        }
-        .inspector-details {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .inspector-title {
-            font-size: 15px;
-            font-weight: 800;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .inspector-status {
-            font-size: 11px;
-            font-weight: 700;
-            color: #68d391;
-        }
-        .inspector-status.bottleneck {
-            color: #fc8181;
-            animation: pulse-dot 1s infinite;
-        }
-        .inspector-stats {
-            font-size: 11px;
-            color: var(--text-sub);
-        }
-        .inspector-btn-quick-buy {
-            background: linear-gradient(135deg, var(--emerald), var(--emerald-hover));
-            border: none;
-            color: #fff;
-            padding: 8px 14px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 4px 10px var(--emerald-glow);
-            white-space: nowrap;
-            transition: transform 0.15s;
-        }
-        .inspector-btn-quick-buy:hover {
-            transform: translateY(-2px);
-        }
-        .inspector-close-btn {
-            background: none;
-            border: none;
-            color: var(--text-sub);
-            font-size: 20px;
-            cursor: pointer;
-            padding: 4px;
-        }
-        .inspector-close-btn:hover { color: #fff; }
 
-        /* Celebratory Event / Milestone Banner */
+        /* Celebratory Milestone / Event Banner */
         #event-banner {
             position: absolute;
             top: 70px;
             left: 50%;
-            transform: translateX(-50%) translateY(-140px);
-            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            transform: translateX(-50%) translateY(-150%);
+            background: linear-gradient(135deg, #f59e0b, #d97706);
             color: #fff;
             padding: 10px 24px;
-            border-radius: 30px;
+            border-radius: 24px;
             font-size: 15px;
             font-weight: 900;
-            box-shadow: 0 8px 30px rgba(255, 126, 95, 0.6);
+            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.6);
             z-index: 30;
             pointer-events: none;
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             align-items: center;
             gap: 10px;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
         #event-banner.show {
             transform: translateX(-50%) translateY(0);
         }
 
-        /* Action Pill Bar (Bottom Left) */
+        /* Bottom Action Bar */
         .action-pills {
             position: absolute;
             bottom: 14px;
@@ -373,7 +260,7 @@
         }
 
         .pill-btn {
-            background: linear-gradient(135deg, rgba(26, 32, 48, 0.9), rgba(18, 22, 33, 0.95));
+            background: rgba(15, 23, 42, 0.92);
             border: 1px solid var(--panel-border);
             color: var(--text-main);
             padding: 9px 14px;
@@ -387,46 +274,32 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.35);
             transition: all 0.2s ease;
-            position: relative;
         }
         .pill-btn:hover {
             transform: translateY(-2px);
             border-color: rgba(255,255,255,0.35);
-            background: rgba(35, 43, 64, 0.95);
+            background: rgba(30, 41, 59, 0.95);
         }
         .pill-btn:active {
             transform: translateY(1px);
         }
         .pill-btn.boost-btn {
-            background: linear-gradient(135deg, #e53e3e, #dd6b20);
+            background: linear-gradient(135deg, #ef4444, #f97316);
             border: none;
             color: #fff;
-            box-shadow: 0 4px 15px rgba(229, 62, 62, 0.5);
-        }
-        .pill-badge-alert {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #e53e3e;
-            color: #fff;
-            font-size: 10px;
-            font-weight: 900;
-            border-radius: 10px;
-            padding: 2px 6px;
-            border: 2px solid var(--bg-dark);
-            animation: pulse-dot 1.5s infinite;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.45);
         }
 
-        /* Desktop Sidebar & Mobile Bottom Sheet */
+        /* Desktop Upgrade Drawer & Mobile Bottom Sheet */
         #shop-panel {
-            width: 410px;
+            width: 420px;
             height: 100%;
             background: var(--panel-bg);
             border-left: 1px solid var(--panel-border);
             display: flex;
             flex-direction: column;
             z-index: 20;
-            box-shadow: -8px 0 30px rgba(0,0,0,0.5);
+            box-shadow: -8px 0 30px rgba(0,0,0,0.6);
             backdrop-filter: blur(14px);
             transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
@@ -437,7 +310,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            background: rgba(14, 18, 27, 0.6);
+            background: rgba(15, 23, 42, 0.7);
         }
 
         .shop-title-row {
@@ -449,11 +322,10 @@
         .shop-title {
             font-size: 17px;
             font-weight: 900;
+            color: #fde68a;
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #ffe082;
-            letter-spacing: 0.3px;
         }
 
         .buy-mult-toggle {
@@ -477,21 +349,18 @@
         }
 
         .mult-btn.active {
-            background: linear-gradient(135deg, var(--emerald), var(--emerald-hover));
+            background: linear-gradient(135deg, #22c55e, #16a34a);
             color: #fff;
-            box-shadow: 0 2px 8px var(--emerald-glow);
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
         }
 
-        /* Shop Category Filter Tabs */
         .category-tabs {
             display: flex;
             gap: 6px;
             overflow-x: auto;
             padding-bottom: 2px;
         }
-        .category-tabs::-webkit-scrollbar {
-            display: none;
-        }
+        .category-tabs::-webkit-scrollbar { display: none; }
         .cat-tab {
             background: rgba(255,255,255,0.06);
             border: 1px solid rgba(255,255,255,0.08);
@@ -504,16 +373,13 @@
             white-space: nowrap;
             transition: all 0.2s;
         }
-        .cat-tab:hover {
-            color: #fff;
-            background: rgba(255,255,255,0.12);
-        }
+        .cat-tab:hover { color: #fff; background: rgba(255,255,255,0.12); }
         .cat-tab.active {
-            background: var(--gold);
-            color: #11151f;
-            border-color: var(--gold);
+            background: #10b981;
+            color: #fff;
+            border-color: #10b981;
             font-weight: 800;
-            box-shadow: 0 2px 8px var(--gold-glow);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
         }
 
         .shop-list {
@@ -524,18 +390,15 @@
             flex-direction: column;
             gap: 10px;
         }
-
-        .shop-list::-webkit-scrollbar {
-            width: 6px;
-        }
+        .shop-list::-webkit-scrollbar { width: 6px; }
         .shop-list::-webkit-scrollbar-thumb {
             background: rgba(255,255,255,0.15);
             border-radius: 3px;
         }
 
-        /* 3D Tactile Tycoon Upgrade Card */
+        /* 3D Upgrade Card */
         .upgrade-card {
-            background: linear-gradient(135deg, rgba(32, 39, 58, 0.75), rgba(20, 25, 38, 0.85));
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.75), rgba(15, 23, 42, 0.85));
             border: 1px solid var(--panel-border);
             border-radius: 14px;
             padding: 12px;
@@ -544,17 +407,16 @@
             justify-content: space-between;
             gap: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.2s ease, border-color 0.2s ease;
             position: relative;
-            overflow: hidden;
         }
         .upgrade-card:hover {
             border-color: rgba(255,255,255,0.25);
             box-shadow: 0 6px 16px rgba(0,0,0,0.45);
         }
         .upgrade-card.can-buy {
-            border-color: rgba(72, 187, 120, 0.45);
-            box-shadow: 0 4px 16px rgba(72, 187, 120, 0.15);
+            border-color: rgba(34, 197, 94, 0.45);
+            box-shadow: 0 4px 16px rgba(34, 197, 94, 0.15);
         }
         .upgrade-card.shake {
             animation: shake 0.4s ease-in-out;
@@ -585,14 +447,12 @@
             flex-direction: column;
             gap: 3px;
         }
-
         .upgrade-title-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 6px;
         }
-
         .upgrade-name {
             font-size: 13px;
             font-weight: 800;
@@ -601,19 +461,17 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
         .upgrade-level-tag {
             font-size: 11px;
             font-weight: 800;
-            color: var(--gold);
-            background: rgba(255,207,51,0.15);
-            border: 1px solid rgba(255,207,51,0.3);
+            color: #fde68a;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
             padding: 1px 6px;
             border-radius: 8px;
             white-space: nowrap;
         }
 
-        /* Milestone Bar */
         .milestone-bar-wrap {
             display: flex;
             flex-direction: column;
@@ -631,7 +489,7 @@
         .milestone-fill {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #48bb78, #ecc94b);
+            background: linear-gradient(90deg, #22c55e, #f59e0b);
             border-radius: 3px;
             transition: width 0.3s ease;
         }
@@ -643,20 +501,20 @@
             font-weight: 600;
         }
         .milestone-bonus {
-            color: var(--gold);
+            color: #fde68a;
             font-weight: 700;
         }
 
         .upgrade-stat-row {
             font-size: 11px;
-            color: #68d391;
+            color: #34d399;
             font-weight: 600;
         }
 
         /* 3D Tactile Buy Button */
         .buy-btn {
             position: relative;
-            background: linear-gradient(180deg, #38a169 0%, #276749 100%);
+            background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
             border: none;
             color: #fff;
             padding: 8px 12px;
@@ -664,82 +522,62 @@
             font-size: 13px;
             font-weight: 900;
             cursor: pointer;
-            box-shadow: 0 4px 0 #1c4934, 0 6px 14px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 0 #166534, 0 6px 14px rgba(0,0,0,0.4);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-width: 90px;
-            transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
             flex-shrink: 0;
         }
         .buy-btn:active {
             transform: translateY(3px);
-            box-shadow: 0 1px 0 #1c4934, 0 2px 6px rgba(0,0,0,0.4);
+            box-shadow: 0 1px 0 #166534, 0 2px 6px rgba(0,0,0,0.4);
         }
         .buy-btn.can-buy {
-            background: linear-gradient(180deg, #48bb78 0%, #2f855a 100%);
-            box-shadow: 0 4px 0 #22543d, 0 6px 14px var(--emerald-glow);
-            animation: pulse-emerald 2s infinite;
+            background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+            box-shadow: 0 4px 0 #065f46, 0 6px 14px var(--cash-glow);
+            animation: pulse-green 2s infinite;
         }
-        @keyframes pulse-emerald {
-            0%, 100% { box-shadow: 0 4px 0 #22543d, 0 6px 14px var(--emerald-glow); }
-            50% { box-shadow: 0 4px 0 #22543d, 0 8px 22px rgba(72, 187, 120, 0.85); }
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 4px 0 #065f46, 0 6px 14px var(--cash-glow); }
+            50% { box-shadow: 0 4px 0 #065f46, 0 8px 22px rgba(52, 211, 153, 0.85); }
         }
         .buy-btn.disabled {
-            background: #232a3b;
+            background: #1e293b;
             color: #64748b;
             cursor: pointer;
-            box-shadow: 0 3px 0 #141824;
+            box-shadow: 0 3px 0 #0f172a;
             opacity: 0.75;
             animation: none;
         }
-        .buy-btn.disabled:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #141824;
-        }
         .buy-btn.maxed {
-            background: linear-gradient(180deg, #d69e2e, #b7791f);
+            background: linear-gradient(180deg, #f59e0b, #b45309);
             color: #fff;
-            box-shadow: 0 4px 0 #744210;
+            box-shadow: 0 4px 0 #78350f;
             cursor: default;
         }
-        .buy-btn-level {
-            font-size: 11px;
-            opacity: 0.9;
-        }
-        .buy-btn-cost {
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 3px;
-        }
-        .buy-btn-need {
-            font-size: 9px;
-            color: #fca5a5;
-            font-weight: 600;
-        }
+        .buy-btn-level { font-size: 11px; opacity: 0.9; }
+        .buy-btn-cost { font-size: 13px; display: flex; align-items: center; gap: 3px; }
+        .buy-btn-need { font-size: 9px; color: #f87171; font-weight: 600; }
 
-        /* Mobile Bottom Sheet & Overlay */
+        /* Mobile Bottom Sheet */
         #shop-toggle-mobile {
             display: none;
             position: absolute;
             bottom: 14px;
             right: 14px;
-            background: linear-gradient(135deg, var(--gold), #f6ad55);
-            color: #1a1e29;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
             border: none;
             padding: 11px 20px;
             border-radius: 26px;
             font-weight: 900;
             font-size: 14px;
-            box-shadow: 0 6px 20px var(--gold-glow);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
             z-index: 10;
             cursor: pointer;
-            transition: transform 0.2s;
-        }
-        #shop-toggle-mobile:hover {
-            transform: scale(1.05);
         }
 
         /* Modals */
@@ -749,7 +587,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.78);
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(10px);
             z-index: 100;
             display: flex;
@@ -760,14 +598,12 @@
             pointer-events: none;
             transition: opacity 0.3s ease;
         }
-
         .modal-overlay.active {
             opacity: 1;
             pointer-events: auto;
         }
-
         .modal-card {
-            background: linear-gradient(135deg, #1b2130, #131722);
+            background: linear-gradient(135deg, #1e293b, #0f172a);
             border: 1px solid var(--panel-border);
             border-radius: 22px;
             width: 100%;
@@ -775,7 +611,7 @@
             max-height: 85vh;
             overflow-y: auto;
             padding: 24px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 25px rgba(255,207,51,0.15);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -783,87 +619,11 @@
             transform: scale(0.92);
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
-        .modal-overlay.active .modal-card {
-            transform: scale(1);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 900;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #ffe082;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-sub);
-            font-size: 24px;
-            cursor: pointer;
-            padding: 4px;
-        }
+        .modal-overlay.active .modal-card { transform: scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 20px; font-weight: 900; display: flex; align-items: center; gap: 8px; color: #fde68a; }
+        .close-btn { background: none; border: none; color: var(--text-sub); font-size: 24px; cursor: pointer; padding: 4px; }
         .close-btn:hover { color: #fff; }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .input-group label {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--text-sub);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .input-wrap {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-field {
-            width: 100%;
-            background: rgba(0,0,0,0.35);
-            border: 1px solid var(--panel-border);
-            border-radius: 12px;
-            padding: 12px 14px;
-            color: #fff;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .input-field:focus {
-            border-color: var(--gold);
-        }
-
-        .pwd-toggle {
-            position: absolute;
-            right: 12px;
-            background: none;
-            border: none;
-            color: var(--text-sub);
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .modal-btn-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 6px;
-        }
 
         .btn-full {
             flex: 1;
@@ -879,180 +639,39 @@
             justify-content: center;
             gap: 6px;
         }
-
         .btn-primary {
-            background: linear-gradient(135deg, var(--gold), #f6ad55);
-            color: #11151f;
-            box-shadow: 0 4px 15px var(--gold-glow);
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
         }
-        .btn-primary:hover {
-            filter: brightness(1.1);
-            transform: translateY(-2px);
-        }
-
+        .btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); }
         .btn-secondary {
             background: rgba(255,255,255,0.08);
             color: #fff;
             border: 1px solid var(--panel-border);
         }
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.16);
-        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.16); }
 
         .btn-danger {
-            background: rgba(245, 101, 101, 0.2);
-            color: var(--ruby);
-            border: 1px solid rgba(245, 101, 101, 0.4);
-        }
-        .btn-danger:hover {
-            background: rgba(245, 101, 101, 0.35);
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
         }
 
-        .inline-msg {
-            font-size: 13px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            display: none;
-        }
-        .inline-msg.error {
-            display: block;
-            background: rgba(245, 101, 101, 0.15);
-            color: #fc8181;
-            border: 1px solid rgba(245, 101, 101, 0.3);
-        }
-        .inline-msg.success {
-            display: block;
-            background: rgba(72, 187, 120, 0.15);
-            color: #68d391;
-            border: 1px solid rgba(72, 187, 120, 0.3);
-        }
-
-        /* Leaderboard Modal Table */
-        .leaderboard-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            max-height: 50vh;
-            overflow-y: auto;
-            margin: 6px 0;
-        }
-        .leader-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 12px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.06);
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group label { font-size: 11px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; }
+        .input-field {
+            width: 100%;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid var(--panel-border);
             border-radius: 12px;
-            font-size: 13px;
-        }
-        .leader-row.me {
-            border-color: var(--gold);
-            background: rgba(255, 207, 51, 0.12);
-        }
-        .leader-rank {
-            font-weight: 900;
-            width: 32px;
-        }
-        .leader-name {
-            flex: 1;
-            font-weight: 800;
+            padding: 12px 14px;
             color: #fff;
+            font-size: 14px;
+            outline: none;
         }
-        .leader-score {
-            font-weight: 900;
-            color: var(--gold);
-        }
-
-        /* Achievements Modal List */
-        .achievements-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 55vh;
-            overflow-y: auto;
-        }
-        .ach-card {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 10px 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .ach-card.completed {
-            border-color: rgba(72, 187, 120, 0.4);
-            background: rgba(72, 187, 120, 0.08);
-        }
-        .ach-icon {
-            font-size: 26px;
-        }
-        .ach-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .ach-title {
-            font-size: 13px;
-            font-weight: 800;
-            color: #fff;
-        }
-        .ach-desc {
-            font-size: 11px;
-            color: var(--text-sub);
-        }
-        .ach-reward {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--gold);
-        }
-        .ach-status-badge {
-            font-size: 11px;
-            font-weight: 800;
-            padding: 4px 8px;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.08);
-            color: var(--text-sub);
-        }
-        .ach-status-badge.claimed {
-            background: #276749;
-            color: #9ae6b4;
-        }
-
-        /* 7-Day Daily Chest Streak Layout */
-        .daily-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin: 12px 0;
-        }
-        .daily-day-card {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 10px 4px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            font-size: 11px;
-        }
-        .daily-day-card.claimed {
-            border-color: #38a169;
-            background: rgba(56, 161, 105, 0.15);
-        }
-        .daily-day-card.today {
-            border-color: var(--gold);
-            background: rgba(255, 207, 51, 0.15);
-            animation: pulse-emerald 2s infinite;
-        }
-        .daily-day-card.mega {
-            grid-column: span 2;
-            background: linear-gradient(135deg, rgba(255,207,51,0.2), rgba(221,107,32,0.2));
-            border-color: var(--gold);
-        }
+        .input-field:focus { border-color: #22c55e; }
+        .modal-btn-row { display: flex; gap: 10px; margin-top: 6px; }
 
         /* Start Screen */
         #start-screen {
@@ -1061,7 +680,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: radial-gradient(circle at center, #232c3f 0%, #0d111a 100%);
+            background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
             z-index: 200;
             display: flex;
             flex-direction: column;
@@ -1070,44 +689,19 @@
             padding: 24px;
             transition: opacity 0.5s ease;
         }
-
-        #start-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .logo-box {
-            text-align: center;
-            margin-bottom: 36px;
-        }
-
+        #start-screen.hidden { opacity: 0; pointer-events: none; }
+        .logo-box { text-align: center; margin-bottom: 36px; }
         .logo-main {
-            font-size: 48px;
+            font-size: 50px;
             font-weight: 900;
-            background: linear-gradient(135deg, #ffe082 0%, #ffb300 50%, #d77618 100%);
+            background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 8px 30px rgba(255, 179, 0, 0.4);
             letter-spacing: -1px;
             margin-bottom: 6px;
         }
-
-        .logo-sub {
-            font-size: 16px;
-            font-weight: 800;
-            color: #a0aec0;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-        }
-
-        .start-btn-box {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            width: 100%;
-            max-width: 330px;
-        }
-
+        .logo-sub { font-size: 16px; font-weight: 800; color: #94a3b8; letter-spacing: 4px; text-transform: uppercase; }
+        .start-btn-box { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 320px; }
         .btn-huge {
             padding: 16px 24px;
             border-radius: 18px;
@@ -1121,35 +715,25 @@
             gap: 10px;
             transition: all 0.25s ease;
         }
-
         .btn-huge.guest {
-            background: linear-gradient(135deg, #48bb78, #2f855a);
+            background: linear-gradient(135deg, #22c55e, #15803d);
             color: #fff;
-            box-shadow: 0 6px 25px rgba(72, 187, 120, 0.45);
+            box-shadow: 0 6px 25px rgba(34, 197, 94, 0.45);
         }
-        .btn-huge.guest:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 35px rgba(72, 187, 120, 0.65);
-        }
-
+        .btn-huge.guest:hover { transform: translateY(-2px); box-shadow: 0 10px 35px rgba(34, 197, 94, 0.65); }
         .btn-huge.auth {
             background: rgba(255, 255, 255, 0.08);
             color: #fff;
             border: 1px solid var(--panel-border);
         }
-        .btn-huge.auth:hover {
-            background: rgba(255, 255, 255, 0.16);
-            transform: translateY(-2px);
-        }
 
-        /* Achievements Toast */
         .toast {
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background: rgba(20, 26, 40, 0.96);
-            border: 2px solid var(--gold);
+            background: rgba(15, 23, 42, 0.96);
+            border: 2px solid #22c55e;
             border-radius: 30px;
             padding: 10px 24px;
             display: flex;
@@ -1158,41 +742,36 @@
             color: #fff;
             font-weight: 800;
             font-size: 14px;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.6), 0 0 20px var(--gold-glow);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.6);
             z-index: 150;
             pointer-events: none;
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
 
-        /* Tutorial Toast */
         #tutorial-toast {
             position: absolute;
             bottom: 78px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(18, 24, 38, 0.95);
-            border: 1px solid var(--gold);
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid #10b981;
             border-radius: 16px;
             padding: 10px 22px;
             font-size: 13px;
             font-weight: 800;
-            color: var(--gold);
+            color: #34d399;
             z-index: 12;
             pointer-events: none;
             box-shadow: 0 6px 25px rgba(0,0,0,0.6);
             animation: bounce 1.8s infinite;
             white-space: nowrap;
         }
-
         @keyframes bounce {
             0%, 100% { transform: translateX(-50%) translateY(0); }
             50% { transform: translateX(-50%) translateY(-6px); }
         }
 
-        /* Responsive Breakpoints */
         @media (max-width: 820px) {
             #shop-panel {
                 position: fixed;
@@ -1204,26 +783,16 @@
                 border-top: 2px solid var(--panel-border);
                 transform: translateY(100%);
             }
-            #shop-panel.open {
-                transform: translateY(0);
-            }
-            #shop-toggle-mobile {
-                display: block;
-            }
-            .hud-top {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .hud-coin-box {
-                align-self: flex-end;
-            }
+            #shop-panel.open { transform: translateY(0); }
+            #shop-toggle-mobile { display: block; }
+            .hud-top { flex-direction: column; align-items: stretch; }
+            .cash-pill-box { align-self: flex-end; }
         }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <!-- Layered Canvases -->
     <div id="canvas-wrapper">
         <canvas id="bg-canvas"></canvas>
         <canvas id="main-canvas"></canvas>
@@ -1231,32 +800,26 @@
 
         <!-- Top HUD -->
         <div class="hud-top">
-            <div class="hud-left-group">
-                <div class="hud-pill-row">
-                    <!-- Wood Tier Banner with Progress Bar -->
-                    <div class="wood-tier-banner" id="btn-wood-tier" title="Click to view wood tiers">
-                        <div class="wood-tier-header">
-                            <span id="badge-tier-name">🪵 Pine Mill</span>
-                            <span class="wood-mult-badge" id="badge-tier-mult">x1.0 Value</span>
-                        </div>
-                        <div class="wood-progress-track">
-                            <div class="wood-progress-fill" id="wood-tier-fill"></div>
-                        </div>
-                        <div class="wood-next-label" id="wood-next-label">Next: Oak Wood (2.5K coins)</div>
+            <div class="hud-left">
+                <div class="hud-row">
+                    <!-- Wood Tier Banner -->
+                    <div class="hud-pill tier" id="btn-wood-tier" title="Wood Tier & Progress">
+                        <span id="badge-tier-name">🪵 Pine Mill</span>
+                        <span style="font-size:11px; opacity:0.85;" id="badge-tier-mult">x1.0</span>
                     </div>
 
-                    <!-- Golden Acorns Counter -->
-                    <div class="hud-badge acorns" id="badge-acorns" title="Golden Acorns from Forest Resets">
+                    <!-- Acorns -->
+                    <div class="hud-pill acorns" id="badge-acorns" title="Golden Acorns">
                         🌰 <span id="acorn-count">0</span>
                     </div>
 
-                    <!-- Leaderboard Trophy Button -->
-                    <div class="hud-badge leaderboard" id="btn-open-leaderboard" title="View Global Tycoon Leaderboard">
+                    <!-- Leaderboard -->
+                    <div class="hud-pill leaderboard" id="btn-open-leaderboard" title="Top Tycoons">
                         🏆 Leaderboard
                     </div>
 
-                    <!-- Cloud Sync Status Indicator -->
-                    <div class="hud-badge sync-status" id="badge-sync" title="Save Status">
+                    <!-- Sync Status -->
+                    <div class="hud-pill sync-status" id="badge-sync" title="Save Status">
                         <span class="status-dot" id="sync-dot"></span>
                         <span id="badge-user">👤 Guest</span>
                         <span id="sync-text">✓ Saved</span>
@@ -1264,47 +827,33 @@
                 </div>
             </div>
 
-            <!-- Big Glowing Tycoon Coin Bank -->
-            <div class="hud-coin-box" id="hud-coin-box">
-                <div class="coin-val">🪙 <span id="coin-counter">0</span></div>
-                <div class="income-rate"><span>📈</span> <span id="income-counter">+$0/s</span></div>
-            </div>
-        </div>
-
-        <!-- Interactive Station Inspector Card (Shows on machine tap) -->
-        <div id="station-inspector">
-            <div class="inspector-icon" id="insp-icon">🪚</div>
-            <div class="inspector-details">
-                <div class="inspector-title">
-                    <span id="insp-title">BuzzSaw Station</span>
-                    <span class="inspector-status" id="insp-status">🟢 Active</span>
+            <!-- YouTube Shorts Style Clean Cash Box -->
+            <div class="cash-pill-box" id="hud-coin-box">
+                <span class="cash-icon-badge">💵</span>
+                <div>
+                    <div class="cash-digits" id="coin-counter">0</div>
+                    <div class="cash-rate-tag" id="income-counter">+💵 0/s</div>
                 </div>
-                <div class="inspector-stats" id="insp-stats">Throughput: 100% • Level 1</div>
             </div>
-            <button class="inspector-btn-quick-buy" id="insp-quick-buy">
-                Upgrade (🪙 40)
-            </button>
-            <button class="inspector-close-btn" id="insp-close">&times;</button>
         </div>
 
-        <!-- Celebratory Event & Milestone Banner -->
+        <!-- In-Canvas Traffic Jam Alert -->
+        <div id="traffic-alert">
+            <span>🚨 TRAFFIC JAM! Upgrade Docks or Road to clear the queue!</span>
+        </div>
+
+        <!-- Event Banner -->
         <div id="event-banner">⚡ RUSH HOUR! 2X SPEED!</div>
 
-        <!-- Tutorial Hint -->
-        <div id="tutorial-toast">💡 Tap anywhere on the mill to boost speed, or tap machines to inspect!</div>
+        <!-- Interactive 3-Step Tutorial Hint -->
+        <div id="tutorial-toast">💡 Tap anywhere on the mill or click the green 3D upgrade pads!</div>
 
-        <!-- Action Pills Bar -->
+        <!-- Bottom Actions -->
         <div class="action-pills">
             <button class="pill-btn boost-btn" id="btn-tap-boost">⚡ Boost (Tap!)</button>
             <button class="pill-btn" id="btn-watch-boost">🎬 2x Boost (3m)</button>
-            <button class="pill-btn" id="btn-daily">
-                🎁 Daily Chest
-                <span class="pill-badge-alert" id="daily-badge" style="display:none;">1</span>
-            </button>
-            <button class="pill-btn" id="btn-achievements">
-                🎖️ Achievements
-                <span class="pill-badge-alert" id="ach-badge" style="display:none;">!</span>
-            </button>
+            <button class="pill-btn" id="btn-daily">🎁 Daily Chest</button>
+            <button class="pill-btn" id="btn-achievements">🎖️ Achievements</button>
             <button class="pill-btn" id="btn-prestige">🌰 Forest Reset</button>
             <button class="pill-btn" id="btn-settings">⚙️ Settings</button>
         </div>
@@ -1312,7 +861,7 @@
         <button id="shop-toggle-mobile">🛒 Upgrades</button>
     </div>
 
-    <!-- Upgrade Shop Sidebar / Bottom Sheet -->
+    <!-- Shop Sidebar -->
     <div id="shop-panel">
         <div class="shop-header">
             <div class="shop-title-row">
@@ -1323,7 +872,6 @@
                     <button class="mult-btn" data-mult="max">MAX</button>
                 </div>
             </div>
-            <!-- Category Tabs -->
             <div class="category-tabs">
                 <button class="cat-tab active" data-cat="all">⭐ All</button>
                 <button class="cat-tab" data-cat="forest">🌲 Forest & Belts</button>
@@ -1355,16 +903,16 @@
             <div class="modal-title">🔑 Cloud Account</div>
             <button class="close-btn" id="auth-close">&times;</button>
         </div>
-        <div class="inline-msg" id="auth-msg"></div>
+        <div id="auth-msg" style="display:none; font-size:13px; padding:8px; border-radius:8px;"></div>
         <div class="input-group">
             <label>Username</label>
             <input type="text" class="input-field" id="auth-username" placeholder="3-20 characters" autocomplete="username">
         </div>
         <div class="input-group">
             <label>Password</label>
-            <div class="input-wrap">
+            <div style="position:relative; display:flex; align-items:center;">
                 <input type="password" class="input-field" id="auth-password" placeholder="At least 6 characters" autocomplete="current-password">
-                <button class="pwd-toggle" id="pwd-toggle">👁</button>
+                <button id="pwd-toggle" style="position:absolute; right:12px; background:none; border:none; color:var(--text-sub); cursor:pointer;">👁</button>
             </div>
         </div>
         <div class="modal-btn-row">
@@ -1381,28 +929,24 @@
             <div class="modal-title">⚙️ Mill Settings</div>
             <button class="close-btn" id="settings-close">&times;</button>
         </div>
-
         <div class="modal-btn-row">
             <button class="btn-full btn-secondary" id="toggle-sfx">SFX: ON</button>
             <button class="btn-full btn-secondary" id="toggle-music">Music: ON</button>
         </div>
-
-        <div class="input-group" style="margin-top: 6px;">
+        <div class="input-group">
             <label>Backend / Cloud Server URL</label>
             <input type="text" class="input-field" id="setting-server-url" placeholder="https://customs-wins-wallace-ultimately.trycloudflare.com">
         </div>
-
-        <div id="settings-account-sec">
-            <div style="font-size: 13px; color: var(--text-sub); margin-bottom: 8px;">
-                Account: <strong id="settings-user-display" style="color: #fff;">Guest</strong>
+        <div>
+            <div style="font-size:13px; color:var(--text-sub); margin-bottom:8px;">
+                Account: <strong id="settings-user-display" style="color:#fff;">Guest</strong>
             </div>
             <div class="modal-btn-row">
                 <button class="btn-full btn-secondary" id="btn-sync-now">☁️ Sync Now</button>
                 <button class="btn-full btn-secondary" id="btn-logout" style="display:none;">Logout</button>
             </div>
         </div>
-
-        <div style="border-top: 1px solid var(--panel-border); padding-top: 12px; margin-top: 6px;">
+        <div style="border-top:1px solid var(--panel-border); padding-top:12px;">
             <button class="btn-full btn-danger" id="btn-reset-save">Reset Save Data</button>
         </div>
     </div>
@@ -1415,11 +959,8 @@
             <div class="modal-title">🏆 Top Lumber Tycoons</div>
             <button class="close-btn" id="leaderboard-close">&times;</button>
         </div>
-        <p style="font-size: 12px; color: var(--text-sub);">
-            Real-time rankings synced across all devices connected to the mill cloud!
-        </p>
-        <div class="leaderboard-list" id="leaderboard-list">
-            <div style="text-align:center; padding: 20px; color: var(--text-sub);">Loading leaderboard...</div>
+        <div id="leaderboard-list" style="display:flex; flex-direction:column; gap:6px; max-height:50vh; overflow-y:auto;">
+            <div style="text-align:center; padding:20px; color:var(--text-sub);">Loading leaderboard...</div>
         </div>
         <button class="btn-full btn-secondary" id="btn-refresh-leaderboard">⟳ Refresh Rankings</button>
     </div>
@@ -1432,55 +973,21 @@
             <div class="modal-title">🎖️ Milestones & Achievements</div>
             <button class="close-btn" id="achievements-close">&times;</button>
         </div>
-        <p style="font-size: 12px; color: var(--text-sub);" id="ach-summary-text">
-            Complete tycoon milestones to earn extra coins and boosts!
-        </p>
-        <div class="achievements-list" id="achievements-list"></div>
+        <div id="achievements-list" style="display:flex; flex-direction:column; gap:8px; max-height:55vh; overflow-y:auto;"></div>
     </div>
 </div>
 
-<!-- Conflict Resolution Modal -->
-<div class="modal-overlay" id="modal-conflict">
-    <div class="modal-card">
-        <div class="modal-header">
-            <div class="modal-title">☁️ Save Conflict</div>
-        </div>
-        <p style="font-size: 13px; color: var(--text-sub); line-height: 1.4;">
-            We found both a cloud save and a local save on this device. Which progress would you like to keep?
-        </p>
-        <div id="conflict-details" style="font-size: 13px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;"></div>
-        <div style="display:flex; flex-direction:column; gap:8px; margin-top:6px;">
-            <button class="btn-full btn-primary" id="btn-keep-richer">🏆 Keep Whichever Earned More</button>
-            <button class="btn-full btn-secondary" id="btn-keep-cloud">☁️ Keep Cloud Progress</button>
-            <button class="btn-full btn-secondary" id="btn-keep-local">📱 Keep Device Progress</button>
-        </div>
-    </div>
-</div>
-
-<!-- Welcome Back / Offline Earnings Modal -->
-<div class="modal-overlay" id="modal-welcome">
-    <div class="modal-card" style="text-align: center;">
-        <div style="font-size: 42px; margin-bottom: 8px;">🎉</div>
-        <div class="modal-title" style="justify-content: center;">Welcome Back, Tycoon!</div>
-        <p style="font-size: 14px; color: var(--text-sub); margin: 6px 0 12px;">
-            While you were away, your mill kept processing lumber!
-        </p>
-        <div style="font-size: 28px; font-weight: 900; color: var(--gold); margin-bottom: 16px;">
-            +🪙 <span id="offline-earned-val">0</span>
-        </div>
-        <button class="btn-full btn-primary" id="btn-claim-offline">Collect Coins</button>
-    </div>
-</div>
-
-<!-- 7-Day Daily Chest Modal -->
+<!-- Daily Chest Modal -->
 <div class="modal-overlay" id="modal-daily">
     <div class="modal-card" style="text-align: center;">
         <div style="font-size: 46px; margin-bottom: 6px;">🎁</div>
         <div class="modal-title" style="justify-content: center;">Daily Lumber Chest</div>
-        <p style="font-size: 13px; color: var(--text-sub); margin: 4px 0 10px;" id="daily-streak-text">
-            Log in every day for escalating rewards!
+        <p style="font-size: 13px; color: var(--text-sub); margin: 6px 0;" id="daily-streak-text">
+            Day Streak: 1
         </p>
-        <div class="daily-grid" id="daily-grid"></div>
+        <div style="font-size: 24px; font-weight: 800; color: #22c55e; margin: 12px 0;" id="daily-reward-preview">
+            +💵 1,000 Cash
+        </div>
         <button class="btn-full btn-primary" id="btn-claim-daily">Claim Today's Chest</button>
         <button class="btn-full btn-secondary" id="btn-close-daily" style="margin-top:6px;">Close</button>
     </div>
@@ -1494,12 +1001,12 @@
             <button class="close-btn" id="prestige-close">&times;</button>
         </div>
         <p style="font-size: 13px; color: var(--text-sub); line-height: 1.4;">
-            Replant your forest and begin a fresh operation! You will reset coins and station levels, but gain permanent <strong>Golden Acorns</strong>.
+            Replant your forest and begin a fresh operation! You will reset cash and station levels, but gain permanent <strong>Golden Acorns</strong>.
         </p>
         <div style="background: rgba(255,207,51,0.1); border: 1px solid var(--gold-glow); padding: 14px; border-radius: 14px; text-align:center;">
             <div style="font-size: 11px; color: var(--text-sub); text-transform: uppercase; font-weight: 800;">Permanent Rewards</div>
             <div style="font-size: 28px; font-weight: 900; color: var(--gold); margin: 6px 0;" id="prestige-acorns-gain">+0 Acorns</div>
-            <div style="font-size: 13px; color: #68d391; font-weight: 700;" id="prestige-boost-gain">+0% Global Profit Forever</div>
+            <div style="font-size: 13px; color: #22c55e; font-weight: 700;" id="prestige-boost-gain">+0% Global Profit Forever</div>
         </div>
         <div class="modal-btn-row">
             <button class="btn-full btn-primary" id="btn-do-prestige">Reset & Claim Acorns</button>
@@ -1514,14 +1021,9 @@
 <script>
 /**
  * LOG JAM: MILL EMPIRE
- * Complete Canvas 2D Idle Tycoon Web Game
- * Self-contained HTML + CSS + JS (Zero CDN dependencies)
- * Compatible with FastAPI / Wings of Fire Python backends
+ * Designed to mirror Idle Lumber Empire / YouTube Shorts reference
  */
 
-// ==========================================
-// 1. CONFIG & TUNING CONSTANTS
-// ==========================================
 const API_CONFIG = {
     BASE_URL: (() => {
         if (typeof window !== 'undefined') {
@@ -1552,72 +1054,45 @@ const WOOD_TIERS = [
 ];
 
 const UPGRADE_DEFS = [
-    { id: "spawnRate",   name: "Log Spawn Rate",      category: "forest",    icon: "🌲", baseCost: 15,    costMult: 1.15, maxLv: 100, desc: "Chop & feed logs faster" },
+    { id: "spawnRate",   name: "Log Feed Rate",       category: "forest",    icon: "🌲", baseCost: 15,    costMult: 1.15, maxLv: 100, desc: "Feed trees faster onto line" },
     { id: "convSpeed",   name: "Conveyor Speed",      category: "forest",    icon: "⏩", baseCost: 25,    costMult: 1.15, maxLv: 100, desc: "Faster roller belts" },
-    { id: "sawCount",    name: "Number of Saws",      category: "sawmill",   icon: "🪚", baseCost: 80,    costMult: 1.75, maxLv: 6,   desc: "Adds up to 6 spinning saws" },
-    { id: "sawSpeed",    name: "Saw Speed & Cut",     category: "sawmill",   icon: "⚡", baseCost: 40,    costMult: 1.16, maxLv: 100, desc: "Quicker cuts & more planks" },
-    { id: "sortSpeed",   name: "Sorting Arms",        category: "sawmill",   icon: "📦", baseCost: 50,    costMult: 1.15, maxLv: 100, desc: "Faster mechanical sorting" },
-    { id: "stackCap",    name: "Stack Capacity",      category: "logistics", icon: "📚", baseCost: 70,    costMult: 1.18, maxLv: 100, desc: "Taller piles in yard" },
-    { id: "craneSpeed",  name: "Crane Speed",         category: "logistics", icon: "🏗️", baseCost: 90,    costMult: 1.16, maxLv: 100, desc: "Quick stack pickup & hoist" },
-    { id: "dockCount",   name: "Loading Docks",       category: "logistics", icon: "🚏", baseCost: 250,   costMult: 2.20, maxLv: 3,   desc: "Adds simultaneous truck bays" },
-    { id: "truckCount",  name: "Truck Fleet",         category: "fleet",     icon: "🚛", baseCost: 180,   costMult: 1.85, maxLv: 5,   desc: "More delivery trucks on route" },
-    { id: "truckCap",    name: "Truck Cargo Bed",     category: "fleet",     icon: "📐", baseCost: 110,   costMult: 1.22, maxLv: 100, desc: "Carry more stacks per trip" },
-    { id: "truckSpeed",  name: "Truck Highway Speed", category: "fleet",     icon: "💨", baseCost: 95,    costMult: 1.15, maxLv: 100, desc: "Quicker road transit" },
-    { id: "roadUpgrade", name: "Road Quality",        category: "fleet",     icon: "🛣️", baseCost: 350,   costMult: 1.90, maxLv: 5,   desc: "Paved lanes & wider bridge" },
-    { id: "woodValue",   name: "Market Value",        category: "fleet",     icon: "💰", baseCost: 150,   costMult: 1.25, maxLv: 100, desc: "Direct sale price multiplier" }
+    { id: "sawCount",    name: "Gantry Saws",         category: "sawmill",   icon: "🪚", baseCost: 80,    costMult: 1.75, maxLv: 6,   desc: "Adds overhead swinging saws" },
+    { id: "sawSpeed",    name: "Blade Speed & Cut",   category: "sawmill",   icon: "⚡", baseCost: 40,    costMult: 1.16, maxLv: 100, desc: "Fast cuts & plank output" },
+    { id: "sortSpeed",   name: "Sorting Chutes",      category: "sawmill",   icon: "📦", baseCost: 50,    costMult: 1.15, maxLv: 100, desc: "Pushes cut planks to stack" },
+    { id: "stackCap",    name: "Tower Height",        category: "logistics", icon: "📚", baseCost: 70,    costMult: 1.18, maxLv: 100, desc: "Massive high-rise stack" },
+    { id: "craneSpeed",  name: "Gantry Crane",        category: "logistics", icon: "🏗️", baseCost: 90,    costMult: 1.16, maxLv: 100, desc: "Fast hoist onto trucks" },
+    { id: "dockCount",   name: "Loading Bays",        category: "logistics", icon: "🚏", baseCost: 250,   costMult: 2.20, maxLv: 3,   desc: "Adds truck loading docks" },
+    { id: "truckCount",  name: "Truck Fleet",         category: "fleet",     icon: "🚛", baseCost: 180,   costMult: 1.85, maxLv: 6,   desc: "More orange delivery trucks" },
+    { id: "truckCap",    name: "Truck Flatbed Bed",   category: "fleet",     icon: "📐", baseCost: 110,   costMult: 1.22, maxLv: 100, desc: "Carry more lumber bundles" },
+    { id: "truckSpeed",  name: "Highway Speed",       category: "fleet",     icon: "💨", baseCost: 95,    costMult: 1.15, maxLv: 100, desc: "Quicker delivery transit" },
+    { id: "roadUpgrade", name: "Road Expansion",      category: "fleet",     icon: "🛣️", baseCost: 350,   costMult: 1.90, maxLv: 5,   desc: "Wider lanes & eliminates jams" },
+    { id: "woodValue",   name: "Lumber Price",        category: "fleet",     icon: "💰", baseCost: 150,   costMult: 1.25, maxLv: 100, desc: "Cash multiplier per plank" }
 ];
 
 const ACHIEVEMENTS = [
-    { id: "first_log",   name: "First Cut",           icon: "🪓", desc: "Process your first log",         cond: s => s.stats.logsProcessed >= 1,   reward: 20 },
-    { id: "logs_50",     name: "Lumberjack",          icon: "🌲", desc: "Cut 50 logs",                    cond: s => s.stats.logsProcessed >= 50,  reward: 100 },
-    { id: "logs_500",    name: "Master Faller",       icon: "🪵", desc: "Cut 500 logs",                   cond: s => s.stats.logsProcessed >= 500, reward: 1000 },
-    { id: "first_truck", name: "Cargo Away!",         icon: "🚛", desc: "Complete 1 truck delivery",      cond: s => s.stats.deliveries >= 1,      reward: 35 },
-    { id: "trucks_25",   name: "Fleet Logistician",   icon: "🛣️", desc: "Complete 25 truck deliveries",   cond: s => s.stats.deliveries >= 25,     reward: 500 },
-    { id: "coins_1k",    name: "Small Business",      icon: "🪙", desc: "Earn 1,000 total coins",         cond: s => s.totalEarned >= 1000,        reward: 50 },
-    { id: "coins_100k",  name: "Log Jam Mogul",       icon: "💰", desc: "Earn 100,000 total coins",       cond: s => s.totalEarned >= 100000,      reward: 2500 },
-    { id: "coins_1m",    name: "Mill Millionaire",    icon: "💎", desc: "Earn 1,000,000 total coins",     cond: s => s.totalEarned >= 1000000,     reward: 15000 },
-    { id: "tier_oak",    name: "Hardwood Era",        icon: "🍂", desc: "Unlock Oak wood tier",           cond: s => s.woodTier >= 1,              reward: 250 },
-    { id: "tier_maple",  name: "Fine Furniture",      icon: "🍁", desc: "Unlock Maple wood tier",         cond: s => s.woodTier >= 2,              reward: 1500 },
-    { id: "tier_golden", name: "Midas Lumber",        icon: "⭐", desc: "Unlock Golden Wood tier",        cond: s => s.woodTier >= 4,              reward: 50000 },
-    { id: "saws_max",    name: "Buzzing Mill",        icon: "🪚", desc: "Max out saw count (6 saws)",     cond: s => (s.upgrades.sawCount||0)>=6,  reward: 2000 },
-    { id: "docks_max",   name: "Busy Harbor",         icon: "🚏", desc: "Max out loading docks (3 docks)",cond: s => (s.upgrades.dockCount||0)>=3, reward: 3000 },
-    { id: "tap_100",     name: "Hands On Manager",    icon: "👆", desc: "Tap scene 100 times",            cond: s => s.stats.taps >= 100,          reward: 200 },
-    { id: "first_reset", name: "New Beginnings",      icon: "🌰", desc: "Perform 1 Forest Reset",         cond: s => s.prestigeCount >= 1,         reward: 500 },
-    { id: "splash_event",name: "River Splash!",       icon: "💦", desc: "A truck took a dip in the river",cond: s => s.stats.splashCount >= 1,    reward: 150 },
-    { id: "golden_log",  name: "Golden Discovery",    icon: "🌟", desc: "Catch a Golden Log",             cond: s => s.stats.goldenLogs >= 1,      reward: 300 }
+    { id: "first_log",   name: "First Cut",           icon: "🪓", desc: "Cut your first log",              cond: s => s.stats.logsProcessed >= 1,   reward: 20 },
+    { id: "logs_50",     name: "Lumberjack",          icon: "🌲", desc: "Cut 50 logs",                     cond: s => s.stats.logsProcessed >= 50,  reward: 100 },
+    { id: "logs_500",    name: "Master Faller",       icon: "🪵", desc: "Cut 500 logs",                    cond: s => s.stats.logsProcessed >= 500, reward: 1000 },
+    { id: "first_truck", name: "Cargo Away!",         icon: "🚛", desc: "Complete 1 truck delivery",       cond: s => s.stats.deliveries >= 1,      reward: 35 },
+    { id: "trucks_25",   name: "Fleet Logistician",   icon: "🛣️", desc: "Complete 25 truck deliveries",    cond: s => s.stats.deliveries >= 25,     reward: 500 },
+    { id: "coins_1k",    name: "Small Business",      icon: "💵", desc: "Earn 1,000 total cash",          cond: s => s.totalEarned >= 1000,        reward: 50 },
+    { id: "coins_100k",  name: "Log Jam Mogul",       icon: "💰", desc: "Earn 100,000 total cash",        cond: s => s.totalEarned >= 100000,      reward: 2500 },
+    { id: "tier_oak",    name: "Hardwood Era",        icon: "🍂", desc: "Unlock Oak wood tier",            cond: s => s.woodTier >= 1,              reward: 250 },
+    { id: "jam_cleared", name: "Traffic Controller",  icon: "🚨", desc: "Clear a 4-truck traffic jam",     cond: s => s.stats.jamsCleared >= 1,     reward: 300 }
 ];
 
-// Interactive Stations Definition for Canvas Taps & Inspector
-const STATIONS = [
-    { id: "spawner",   name: "Forest Spawner",     category: "forest",    icon: "🌲", x: 0.5,  y: 3.5, defId: "spawnRate" },
-    { id: "conveyor",  name: "Roller Conveyor",    category: "forest",    icon: "⏩", x: 2.5,  y: 3.5, defId: "convSpeed" },
-    { id: "saws",      name: "BuzzSaw Station",    category: "sawmill",   icon: "🪚", x: 4.5,  y: 3.5, defId: "sawSpeed", secondaryDefId: "sawCount" },
-    { id: "sorter",    name: "Sorting Machine",    category: "sawmill",   icon: "📦", x: 6.5,  y: 3.5, defId: "sortSpeed" },
-    { id: "yard",      name: "Stacking Yard",      category: "logistics", icon: "📚", x: 8.5,  y: 5.0, defId: "stackCap" },
-    { id: "crane",     name: "Heavy Duty Crane",   category: "logistics", icon: "🏗️", x: 10.5, y: 5.0, defId: "craneSpeed" },
-    { id: "docks",     name: "Loading Bays",       category: "logistics", icon: "🚏", x: 14.0, y: 5.0, defId: "dockCount", secondaryDefId: "truckCount" },
-    { id: "highway",   name: "Delivery Highway",   category: "fleet",     icon: "🚛", x: 14.0, y: 8.5, defId: "truckSpeed", secondaryDefId: "truckCap" },
-    { id: "bridge",    name: "Wooden River Bridge",category: "fleet",     icon: "🌉", x: 14.0, y: 12.0,defId: "roadUpgrade", secondaryDefId: "woodValue" }
+// Diegetic 3D In-World Upgrade Pads (matching YouTube Shorts)
+const WORLD_UPGRADE_PADS = [
+    { id: "pad_saw",   defId: "sawSpeed",   label: "UPGRADE SAWS",  icon: "🪚", x: 4.8,  y: 2.2 },
+    { id: "pad_crane", defId: "craneSpeed", label: "UPGRADE CRANE", icon: "🏗️", x: 10.5, y: 3.5 },
+    { id: "pad_fleet", defId: "truckCount", label: "MORE TRUCKS",   icon: "🚛", x: 14.0, y: 3.0 },
+    { id: "pad_road",  defId: "roadUpgrade",label: "WIDEN ROAD",    icon: "🛣️", x: 14.0, y: 8.5 }
 ];
 
-// Daily Chest Rewards (7-day calendar)
-const DAILY_REWARDS = [
-    { day: 1, coins: 500,     acorns: 0 },
-    { day: 2, coins: 1500,    acorns: 0 },
-    { day: 3, coins: 4000,    acorns: 0 },
-    { day: 4, coins: 10000,   acorns: 0 },
-    { day: 5, coins: 25000,   acorns: 1 },
-    { day: 6, coins: 60000,   acorns: 2 },
-    { day: 7, coins: 150000,  acorns: 5, isMega: true }
-];
-
-// ==========================================
-// 2. HELPER UTILITIES
-// ==========================================
 function formatNumber(num) {
     if (isNaN(num) || num === null || num === undefined) return "0";
     if (num < 1000) return Math.floor(num).toLocaleString();
-    const suffixes = ["", "K", "M", "B", "T", "aa", "ab", "ac", "ad", "ae", "af"];
+    const suffixes = ["", "K", "M", "B", "T", "aa", "ab", "ac"];
     const exp = Math.floor(Math.log10(num) / 3);
     if (exp >= suffixes.length) return num.toExponential(2);
     const scaled = num / Math.pow(10, exp * 3);
@@ -1626,15 +1101,12 @@ function formatNumber(num) {
 
 function escapeHtml(str) {
     if (!str) return "";
-    return String(str).replace(/[&<>"']/g, m => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    }[m]));
+    return String(str).replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m]));
 }
 
 async function sha256(str) {
     if (!window.crypto || !window.crypto.subtle) {
-        let h = 0;
-        for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+        let h = 0; for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
         return Math.abs(h).toString(16).padStart(16, "0");
     }
     const enc = new TextEncoder().encode(str);
@@ -1642,7 +1114,6 @@ async function sha256(str) {
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-// Milestone info for upgrade levels (Lv 10, 25, 50, 100 give 2x boosts)
 function getMilestoneInfo(level, maxLv = 100) {
     const milestones = [10, 25, 50, 100].filter(m => m <= maxLv);
     for (let i = 0; i < milestones.length; i++) {
@@ -1665,27 +1136,15 @@ function getMilestoneMultiplier(level) {
     return mult;
 }
 
-// ==========================================
-// 3. WEB AUDIO SYNTHESIZER
-// ==========================================
+// Audio Engine
 class SoundEngine {
     constructor() {
         this.ctx = null;
         this.sfxEnabled = true;
         this.musicEnabled = true;
-        this.musicGain = null;
         this.sfxGain = null;
-        this.nextNoteTime = 0;
-        this.noteIndex = 0;
-        this.isPlayingMusic = false;
-        this.melody = [
-            261.63, 329.63, 392.00, 523.25, 392.00, 329.63,
-            293.66, 349.23, 440.00, 523.25, 440.00, 349.23,
-            329.63, 392.00, 523.25, 659.25, 523.25, 392.00,
-            293.66, 392.00, 493.88, 587.33, 493.88, 392.00
-        ];
+        this.musicGain = null;
     }
-
     init() {
         if (this.ctx) return;
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1694,169 +1153,64 @@ class SoundEngine {
         this.sfxGain = this.ctx.createGain();
         this.sfxGain.gain.value = 0.35;
         this.sfxGain.connect(this.ctx.destination);
-
-        this.musicGain = this.ctx.createGain();
-        this.musicGain.gain.value = 0.08;
-        this.musicGain.connect(this.ctx.destination);
-
-        if (this.musicEnabled) this.startMusic();
     }
-
     resume() {
-        if (this.ctx && this.ctx.state === 'suspended') {
-            this.ctx.resume();
-        }
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
     }
-
-    startMusic() {
-        if (!this.ctx || this.isPlayingMusic) return;
-        this.isPlayingMusic = true;
-        this.nextNoteTime = this.ctx.currentTime + 0.1;
-        this.scheduleMusic();
-    }
-
-    scheduleMusic() {
-        if (!this.isPlayingMusic || !this.musicEnabled || !this.ctx) return;
-        while (this.nextNoteTime < this.ctx.currentTime + 0.5) {
-            const freq = this.melody[this.noteIndex % this.melody.length];
-            this.playChiptuneNote(freq, this.nextNoteTime, 0.18);
-            this.nextNoteTime += 0.22;
-            this.noteIndex++;
-        }
-        setTimeout(() => this.scheduleMusic(), 150);
-    }
-
-    playChiptuneNote(freq, time, dur) {
-        if (!this.ctx || !this.musicEnabled) return;
-        try {
-            const osc = this.ctx.createOscillator();
-            const g = this.ctx.createGain();
-            osc.type = "triangle";
-            osc.frequency.setValueAtTime(freq, time);
-            g.gain.setValueAtTime(0.08, time);
-            g.gain.exponentialRampToValueAtTime(0.001, time + dur);
-            osc.connect(g);
-            g.connect(this.musicGain);
-            osc.start(time);
-            osc.stop(time + dur);
-        } catch(e) {}
-    }
-
     playSfx(type) {
         if (!this.sfxEnabled || !this.ctx) return;
         this.resume();
         const now = this.ctx.currentTime;
         try {
-            if (type === 'coin') {
+            if (type === 'cash') {
                 const osc = this.ctx.createOscillator();
                 const g = this.ctx.createGain();
                 osc.type = "sine";
-                osc.frequency.setValueAtTime(880, now);
-                osc.frequency.exponentialRampToValueAtTime(1760, now + 0.12);
-                g.gain.setValueAtTime(0.25, now);
-                g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-                osc.connect(g);
-                g.connect(this.sfxGain);
-                osc.start(now);
-                osc.stop(now + 0.12);
-            } else if (type === 'saw') {
-                const osc = this.ctx.createOscillator();
-                const g = this.ctx.createGain();
-                osc.type = "sawtooth";
-                osc.frequency.setValueAtTime(160, now);
-                osc.frequency.linearRampToValueAtTime(240, now + 0.1);
-                g.gain.setValueAtTime(0.12, now);
-                g.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                osc.connect(g);
-                g.connect(this.sfxGain);
-                osc.start(now);
-                osc.stop(now + 0.15);
-            } else if (type === 'clunk') {
-                const osc = this.ctx.createOscillator();
-                const g = this.ctx.createGain();
-                osc.type = "square";
-                osc.frequency.setValueAtTime(120, now);
-                osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
-                g.gain.setValueAtTime(0.25, now);
-                g.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                osc.connect(g);
-                g.connect(this.sfxGain);
-                osc.start(now);
-                osc.stop(now + 0.1);
-            } else if (type === 'horn') {
-                [220, 330].forEach(f => {
+                osc.frequency.setValueAtTime(900, now);
+                osc.frequency.exponentialRampToValueAtTime(1800, now + 0.1);
+                g.gain.setValueAtTime(0.2, now);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                osc.connect(g); g.connect(this.sfxGain);
+                osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'upgrade') {
+                [523, 659, 783, 1046].forEach((f, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const g = this.ctx.createGain();
+                    osc.type = "triangle";
+                    const t = now + idx * 0.05;
+                    osc.frequency.setValueAtTime(f, t);
+                    g.gain.setValueAtTime(0.2, t);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+                    osc.connect(g); g.connect(this.sfxGain);
+                    osc.start(t); osc.stop(t + 0.12);
+                });
+            } else if (type === 'honk') {
+                [240, 320].forEach(f => {
                     const osc = this.ctx.createOscillator();
                     const g = this.ctx.createGain();
                     osc.type = "sawtooth";
                     osc.frequency.setValueAtTime(f, now);
-                    g.gain.setValueAtTime(0.1, now);
-                    g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-                    osc.connect(g);
-                    g.connect(this.sfxGain);
-                    osc.start(now);
-                    osc.stop(now + 0.25);
+                    g.gain.setValueAtTime(0.08, now);
+                    g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.connect(g); g.connect(this.sfxGain);
+                    osc.start(now); osc.stop(now + 0.2);
                 });
-            } else if (type === 'upgrade') {
-                [523.25, 659.25, 783.99, 1046.50].forEach((f, idx) => {
-                    const osc = this.ctx.createOscillator();
-                    const g = this.ctx.createGain();
-                    osc.type = "sine";
-                    const t = now + idx * 0.06;
-                    osc.frequency.setValueAtTime(f, t);
-                    g.gain.setValueAtTime(0.2, t);
-                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-                    osc.connect(g);
-                    g.connect(this.sfxGain);
-                    osc.start(t);
-                    osc.stop(t + 0.1);
-                });
-            } else if (type === 'milestone') {
-                [440, 554.37, 659.25, 880, 1108.73].forEach((f, idx) => {
-                    const osc = this.ctx.createOscillator();
-                    const g = this.ctx.createGain();
-                    osc.type = "triangle";
-                    const t = now + idx * 0.08;
-                    osc.frequency.setValueAtTime(f, t);
-                    g.gain.setValueAtTime(0.3, t);
-                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-                    osc.connect(g);
-                    g.connect(this.sfxGain);
-                    osc.start(t);
-                    osc.stop(t + 0.2);
-                });
-            } else if (type === 'tap') {
-                const osc = this.ctx.createOscillator();
-                const g = this.ctx.createGain();
-                osc.type = "sine";
-                osc.frequency.setValueAtTime(400, now);
-                osc.frequency.exponentialRampToValueAtTime(200, now + 0.04);
-                g.gain.setValueAtTime(0.1, now);
-                g.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
-                osc.connect(g);
-                g.connect(this.sfxGain);
-                osc.start(now);
-                osc.stop(now + 0.04);
-            } else if (type === 'error') {
+            } else if (type === 'saw') {
                 const osc = this.ctx.createOscillator();
                 const g = this.ctx.createGain();
                 osc.type = "sawtooth";
                 osc.frequency.setValueAtTime(140, now);
-                osc.frequency.setValueAtTime(100, now + 0.08);
-                g.gain.setValueAtTime(0.15, now);
-                g.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
-                osc.connect(g);
-                g.connect(this.sfxGain);
-                osc.start(now);
-                osc.stop(now + 0.16);
+                osc.frequency.linearRampToValueAtTime(220, now + 0.1);
+                g.gain.setValueAtTime(0.1, now);
+                g.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                osc.connect(g); g.connect(this.sfxGain);
+                osc.start(now); osc.stop(now + 0.12);
             }
         } catch(e) {}
     }
 }
 const audio = new SoundEngine();
 
-// ==========================================
-// 4. GAME STATE & PROGRESSION
-// ==========================================
 function createDefaultState() {
     return {
         coins: 0,
@@ -1888,6 +1242,7 @@ function createDefaultState() {
             taps: 0,
             splashCount: 0,
             goldenLogs: 0,
+            jamsCleared: 0,
             playTime: 0
         },
         settings: {
@@ -1905,17 +1260,12 @@ let gameState = createDefaultState();
 let currentUser = null;
 let buyMultiplier = 1;
 let currentCategory = "all";
-let selectedStation = null;
 let tapBoostRemaining = 0;
 let watchBoostRemaining = 0;
 let rushHourRemaining = 0;
+let isTrafficJam = false;
 
-// Cache map of upgrade cards for live updating without DOM recreation
-const shopCardsMap = new Map();
-
-// ==========================================
-// 5. STORAGE & CLOUD API MODULE
-// ==========================================
+// Storage
 const Storage = {
     GUEST_KEY: "logjam_save_guest",
     USER_KEY_PREFIX: "logjam_save_user_",
@@ -1926,13 +1276,9 @@ const Storage = {
         const key = currentUser ? (this.USER_KEY_PREFIX + currentUser.username.toLowerCase()) : this.GUEST_KEY;
         try {
             localStorage.setItem(key, JSON.stringify(gameState));
-            if (currentUser) {
-                localStorage.setItem(this.ACTIVE_USER_KEY, JSON.stringify(currentUser));
-            }
+            if (currentUser) localStorage.setItem(this.ACTIVE_USER_KEY, JSON.stringify(currentUser));
             updateSyncIndicator("✓ Saved", "saved");
-        } catch (e) {
-            console.warn("Local storage write error:", e);
-        }
+        } catch (e) {}
     },
 
     loadLocal(username = null) {
@@ -1967,11 +1313,7 @@ const Storage = {
             });
             clearTimeout(tid);
             const data = await resp.json();
-            if (data.ok) {
-                updateSyncIndicator("✓ Synced", "saved");
-            } else {
-                updateSyncIndicator("⚠ Offline", "offline");
-            }
+            updateSyncIndicator(data.ok ? "✓ Synced" : "⚠ Offline", data.ok ? "saved" : "offline");
         } catch (e) {
             updateSyncIndicator("⚠ Offline", "offline");
         }
@@ -1982,14 +1324,10 @@ function updateSyncIndicator(msg, state = "saved") {
     const el = document.getElementById("sync-text");
     const dot = document.getElementById("sync-dot");
     if (el) el.textContent = msg;
-    if (dot) {
-        dot.className = "status-dot " + state;
-    }
+    if (dot) dot.className = "status-dot " + state;
 }
 
-// ==========================================
-// 6. ISOMETRIC 2D RENDERER & VISUALS
-// ==========================================
+// Isometric Projection
 const TILE_W = 60;
 const TILE_H = 30;
 
@@ -2010,18 +1348,10 @@ function fromIso(screenX, screenY) {
 
 class Particle {
     constructor(x, y, vx, vy, color, size, life) {
-        this.x = x; this.y = y;
-        this.vx = vx; this.vy = vy;
-        this.color = color;
-        this.size = size;
-        this.life = life;
-        this.maxLife = life;
+        this.x = x; this.y = y; this.vx = vx; this.vy = vy;
+        this.color = color; this.size = size; this.life = life; this.maxLife = life;
     }
-    update(dt) {
-        this.x += this.vx * dt;
-        this.y += this.vy * dt;
-        this.life -= dt;
-    }
+    update(dt) { this.x += this.vx * dt; this.y += this.vy * dt; this.life -= dt; }
     draw(ctx) {
         const a = Math.max(0, this.life / this.maxLife);
         ctx.save();
@@ -2035,18 +1365,11 @@ class Particle {
 }
 
 class FloatingText {
-    constructor(x, y, text, color = "#ffcf33", size = 16) {
-        this.x = x; this.y = y;
-        this.text = text;
-        this.color = color;
-        this.size = size;
-        this.life = 1.2;
-        this.maxLife = 1.2;
+    constructor(x, y, text, color = "#22c55e", size = 16) {
+        this.x = x; this.y = y; this.text = text; this.color = color;
+        this.size = size; this.life = 1.2; this.maxLife = 1.2;
     }
-    update(dt) {
-        this.y -= 28 * dt;
-        this.life -= dt;
-    }
+    update(dt) { this.y -= 26 * dt; this.life -= dt; }
     draw(ctx) {
         const a = Math.max(0, this.life / this.maxLife);
         ctx.save();
@@ -2054,8 +1377,8 @@ class FloatingText {
         ctx.fillStyle = this.color;
         ctx.font = `900 ${this.size}px ${getComputedStyle(document.body).fontFamily}`;
         ctx.textAlign = "center";
-        ctx.shadowColor = "rgba(0,0,0,0.85)";
-        ctx.shadowBlur = 5;
+        ctx.shadowColor = "rgba(0,0,0,0.8)";
+        ctx.shadowBlur = 4;
         ctx.fillText(this.text, this.x, this.y);
         ctx.restore();
     }
@@ -2065,8 +1388,9 @@ let particles = [];
 let floatingTexts = [];
 let logs = [];
 let planks = [];
-let stacks = [];
+let lumberTowerCount = 4; // High-rise stack pile
 let trucks = [];
+let looseChips = [];
 
 const bgCanvas = document.getElementById("bg-canvas");
 const mainCanvas = document.getElementById("main-canvas");
@@ -2074,8 +1398,7 @@ const uiCanvas = document.getElementById("ui-canvas");
 const bgCtx = bgCanvas.getContext("2d");
 const mainCtx = mainCanvas.getContext("2d");
 const uiCtx = uiCanvas.getContext("2d");
-
-let camera = { x: 0, y: 0, zoom: 1 };
+let camera = { x: 0, y: 0 };
 
 function resizeCanvases() {
     const dpr = window.devicePixelRatio || 1;
@@ -2090,12 +1413,13 @@ function resizeCanvases() {
         ctx.scale(dpr, dpr);
     });
 
-    camera.x = w / 2;
-    camera.y = h / 2 - 40;
+    camera.x = w / 2 - 20;
+    camera.y = h / 2 - 50;
     renderBackground();
 }
 window.addEventListener("resize", resizeCanvases);
 
+// Render 3D Low-Poly Forest & Background
 function renderBackground() {
     const w = bgCanvas.parentElement.clientWidth;
     const h = bgCanvas.parentElement.clientHeight;
@@ -2104,16 +1428,16 @@ function renderBackground() {
     bgCtx.save();
     bgCtx.translate(camera.x, camera.y);
 
-    // Terrain Tiles
+    // Ground Terrain
     for (let x = -4; x <= 16; x++) {
         for (let y = -2; y <= 16; y++) {
             const p = toIso(x, y, 0);
-            let fill = (x >= 13 && x <= 15) ? "#444652" : // Paved Asphalt Road
-                       (x > 15) ? "#3182ce" : // Deep River
-                       ((x + y) % 2 === 0 ? "#5ea332" : "#56962e"); // Vibrant Grass
+            let fill = (x >= 13 && x <= 15) ? "#334155" : // Asphalt Road
+                       (x > 15) ? "#0284c7" : // River
+                       ((x + y) % 2 === 0 ? "#4ade80" : "#22c55e"); // Bright Stylized Grass
 
             if (x >= 4 && x <= 11 && y >= 3 && y <= 9) {
-                fill = "#b8956a"; // Dirt Mill Yard
+                fill = "#d97706"; // Factory Yard Sandy Dirt
             }
 
             bgCtx.fillStyle = fill;
@@ -2127,7 +1451,7 @@ function renderBackground() {
         }
     }
 
-    // Road Markings
+    // Road Lane Lines
     for (let y = -2; y <= 15; y += 2) {
         const rp = toIso(14, y, 0);
         bgCtx.fillStyle = "#ffffff";
@@ -2136,13 +1460,13 @@ function renderBackground() {
 
     // Wooden Bridge
     const bp = toIso(14, 11, 0.2);
-    bgCtx.fillStyle = "#8a5c36";
+    bgCtx.fillStyle = "#b45309";
     bgCtx.fillRect(bp.x - 36, bp.y - 10, 72, 30);
-    bgCtx.strokeStyle = "#5a3c20";
+    bgCtx.strokeStyle = "#78350f";
     bgCtx.lineWidth = 2;
     bgCtx.strokeRect(bp.x - 36, bp.y - 10, 72, 30);
 
-    // Pine Trees
+    // Dense Low-Poly Pine Forest on Perimeter
     const treeCoords = [
         [-3,-1], [-2,-1], [-1,-1], [0,-1], [1,-1],
         [-3,1], [-3,3], [-3,5], [-3,7], [-2,9], [-1,11],
@@ -2150,28 +1474,42 @@ function renderBackground() {
     ];
     treeCoords.forEach(([tx, ty]) => {
         const tp = toIso(tx, ty, 0);
-        drawPineTree(bgCtx, tp.x, tp.y);
+        drawLowPolyPine(bgCtx, tp.x, tp.y);
     });
+
+    // Harbor Dock Pier & Berthed Cargo Ship
+    const dp = toIso(16, 5, 0);
+    bgCtx.fillStyle = "#94a3b8"; // Concrete dock apron
+    bgCtx.fillRect(dp.x - 20, dp.y - 15, 40, 50);
+
+    // Cargo Ship
+    const sp = toIso(17, 7, 0.1);
+    bgCtx.fillStyle = "#f8fafc"; // White hull
+    bgCtx.beginPath();
+    bgCtx.ellipse(sp.x + 10, sp.y, 34, 16, 0, 0, Math.PI * 2);
+    bgCtx.fill();
+    bgCtx.fillStyle = "#0284c7"; // Blue deck cabin
+    bgCtx.fillRect(sp.x - 4, sp.y - 12, 16, 12);
 
     bgCtx.restore();
 }
 
-function drawPineTree(ctx, x, y) {
+function drawLowPolyPine(ctx, x, y) {
     ctx.fillStyle = "rgba(0,0,0,0.18)";
     ctx.beginPath();
-    ctx.ellipse(x, y + 14, 16, 8, 0, 0, Math.PI * 2);
+    ctx.ellipse(x, y + 14, 18, 9, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#5c3c1e";
+    ctx.fillStyle = "#78350f";
     ctx.fillRect(x - 3, y - 4, 6, 16);
 
-    const foliage = ["#1b5e20", "#2e7d32", "#388e3c"];
-    foliage.forEach((c, idx) => {
+    const foliageColors = ["#14532d", "#166534", "#15803d"];
+    foliageColors.forEach((c, idx) => {
         ctx.fillStyle = c;
         ctx.beginPath();
-        ctx.moveTo(x, y - 36 - idx * 12);
-        ctx.lineTo(x + 18 - idx * 2, y - 10 - idx * 12);
-        ctx.lineTo(x - 18 + idx * 2, y - 10 - idx * 12);
+        ctx.moveTo(x, y - 38 - idx * 12);
+        ctx.lineTo(x + 20 - idx * 2, y - 10 - idx * 12);
+        ctx.lineTo(x - 20 + idx * 2, y - 10 - idx * 12);
         ctx.closePath();
         ctx.fill();
     });
@@ -2183,7 +1521,7 @@ function drawIsoBox(ctx, x, y, z, w, h, d, topColor, leftColor, rightColor) {
     const sh = h * (TILE_H / 2);
     const sz = d * 18;
 
-    // Top Face
+    // Top
     ctx.fillStyle = topColor;
     ctx.beginPath();
     ctx.moveTo(p.x, p.y - sz);
@@ -2193,7 +1531,7 @@ function drawIsoBox(ctx, x, y, z, w, h, d, topColor, leftColor, rightColor) {
     ctx.closePath();
     ctx.fill();
 
-    // Left Face
+    // Left
     ctx.fillStyle = leftColor;
     ctx.beginPath();
     ctx.moveTo(p.x - sw, p.y + sh - sz);
@@ -2203,7 +1541,7 @@ function drawIsoBox(ctx, x, y, z, w, h, d, topColor, leftColor, rightColor) {
     ctx.closePath();
     ctx.fill();
 
-    // Right Face
+    // Right
     ctx.fillStyle = rightColor;
     ctx.beginPath();
     ctx.moveTo(p.x + sw, p.y + sh - sz);
@@ -2214,102 +1552,122 @@ function drawIsoBox(ctx, x, y, z, w, h, d, topColor, leftColor, rightColor) {
     ctx.fill();
 }
 
-function drawLogEntity(ctx, log) {
-    const tier = WOOD_TIERS[log.tier] || WOOD_TIERS[0];
-    const p = toIso(log.x, log.y, log.z);
-    const rad = 14;
+// Draw In-World Diegetic 3D Upgrade Pad
+function drawWorldUpgradePad(ctx, pad) {
+    const def = UPGRADE_DEFS.find(u => u.id === pad.defId);
+    if (!def) return;
+    const curLv = gameState.upgrades[pad.defId] || 0;
+    const isMax = curLv >= (def.maxLv || 100);
+    const cost = Math.round(def.baseCost * Math.pow(def.costMult, curLv));
+    const canAfford = !isMax && gameState.coins >= cost;
 
-    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    const p = toIso(pad.x, pad.y, 0.05);
+
+    // Base Pad Box
+    const topCol = canAfford ? "#22c55e" : "#334155";
+    const leftCol = canAfford ? "#16a34a" : "#1e293b";
+    const rightCol = canAfford ? "#15803d" : "#0f172a";
+
+    // Pad shadow
+    ctx.fillStyle = "rgba(0,0,0,0.25)";
     ctx.beginPath();
-    ctx.ellipse(p.x, p.y + 4, rad, rad * 0.5, 0, 0, Math.PI * 2);
+    ctx.ellipse(p.x, p.y + 12, 38, 18, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = tier.color;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y - 10, rad, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = tier.barkColor;
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
+    drawIsoBox(ctx, pad.x, pad.y, 0.05, 1.2, 1.2, 0.2, topCol, leftCol, rightCol);
 
-    ctx.strokeStyle = tier.barkColor;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y - 10, rad * 0.5, 0, Math.PI * 2);
-    ctx.stroke();
-
-    const faceX = p.x;
-    const faceY = p.y - 10;
-
-    if (log.state === 'panic') {
-        ctx.fillStyle = "#fff";
+    // Glowing border if affordable
+    if (canAfford) {
+        ctx.strokeStyle = "#4ade80";
+        ctx.lineWidth = 2.5;
+        const sw = 1.2 * (TILE_W / 2);
+        const sh = 1.2 * (TILE_H / 2);
         ctx.beginPath();
-        ctx.arc(faceX - 5, faceY - 2, 4, 0, Math.PI * 2);
-        ctx.arc(faceX + 5, faceY - 2, 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = "#000";
-        ctx.beginPath();
-        ctx.arc(faceX - 5, faceY - 3, 2, 0, Math.PI * 2);
-        ctx.arc(faceX + 5, faceY - 3, 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = "#222";
-        ctx.beginPath();
-        ctx.arc(faceX, faceY + 5, 3.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = "#63b3ed";
-        ctx.beginPath();
-        ctx.arc(faceX + 9, faceY - 8, 2, 0, Math.PI * 2);
-        ctx.fill();
-    } else {
-        ctx.fillStyle = "#222";
-        ctx.beginPath();
-        ctx.arc(faceX - 4, faceY - 2, 2, 0, Math.PI * 2);
-        ctx.arc(faceX + 4, faceY - 2, 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = "#222";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(faceX, faceY + 2, 3.5, 0.1, Math.PI - 0.1);
+        ctx.moveTo(p.x, p.y - 4);
+        ctx.lineTo(p.x + sw, p.y + sh - 4);
+        ctx.lineTo(p.x, p.y + sh * 2 - 4);
+        ctx.lineTo(p.x - sw, p.y + sh - 4);
+        ctx.closePath();
         ctx.stroke();
     }
+
+    // Text on Pad
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 11px sans-serif";
+    ctx.textAlign = "center";
+    ctx.shadowColor = "rgba(0,0,0,0.7)";
+    ctx.shadowBlur = 3;
+    ctx.fillText(`${pad.icon} ${pad.label}`, p.x, p.y + 14);
+
+    ctx.fillStyle = canAfford ? "#fef08a" : "#cbd5e1";
+    ctx.font = "900 12px sans-serif";
+    ctx.fillText(isMax ? 'MAX' : `💵 ${formatNumber(cost)}`, p.x, p.y + 26);
 }
 
+// Draw Orange Flatbed Delivery Truck with Traffic Jam Emoji Bubbles
 function drawTruckEntity(ctx, t) {
     const p = toIso(t.x, t.y, 0);
-    const bodyColor = t.color || "#e53e3e";
     const wobble = t.onBridge ? Math.sin(Date.now() * 0.02) * 3 : 0;
 
+    // Truck Shadow
     ctx.fillStyle = "rgba(0,0,0,0.25)";
     ctx.beginPath();
     ctx.ellipse(p.x, p.y + 10, 24, 12, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#2d3748";
+    // Wheels
+    ctx.fillStyle = "#1e293b";
     ctx.fillRect(p.x - 18, p.y + 2 + wobble, 8, 8);
     ctx.fillRect(p.x + 10, p.y + 2 + wobble, 8, 8);
 
-    drawIsoBox(ctx, t.x - 0.2, t.y, 0.2 + wobble * 0.02, 0.6, 0.6, 0.8, bodyColor, "#c53030", "#9b2c2c");
+    // Truck Cab (Orange / White)
+    drawIsoBox(ctx, t.x - 0.2, t.y, 0.2 + wobble * 0.02, 0.6, 0.6, 0.8, "#ea580c", "#c2410c", "#9a3412");
 
-    ctx.fillStyle = "#bee3f8";
+    // Windshield
+    ctx.fillStyle = "#e0f2fe";
     ctx.fillRect(p.x - 4, p.y - 16 + wobble, 10, 6);
 
-    drawIsoBox(ctx, t.x + 0.5, t.y, 0.1 + wobble * 0.02, 0.8, 0.7, 0.4, "#718096", "#4a5568", "#2d3748");
+    // Flatbed
+    drawIsoBox(ctx, t.x + 0.5, t.y, 0.1 + wobble * 0.02, 0.8, 0.7, 0.4, "#64748b", "#475569", "#334155");
 
+    // Loaded Stacks
     if (t.cargoStacks > 0) {
         const tier = WOOD_TIERS[gameState.woodTier];
         for (let s = 0; s < t.cargoStacks; s++) {
             drawIsoBox(ctx, t.x + 0.5, t.y, 0.5 + s * 0.3 + wobble * 0.02, 0.6, 0.5, 0.25, tier.plankColor, tier.barkColor, tier.barkColor);
         }
     }
+
+    // Traffic Jam Angry Emoji Bubble (😡) if waiting in queue
+    if (t.isJammed) {
+        const bob = Math.sin(Date.now() * 0.008 + t.id) * 3;
+        const bx = p.x;
+        const by = p.y - 38 + bob;
+
+        // White speech bubble pin
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(bx, by, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#ef4444";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Pin tail
+        ctx.beginPath();
+        ctx.moveTo(bx - 4, by + 12);
+        ctx.lineTo(bx, by + 18);
+        ctx.lineTo(bx + 4, by + 12);
+        ctx.fill();
+
+        // Angry Face (😡)
+        ctx.font = "16px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("😡", bx, by + 6);
+    }
 }
 
-// ==========================================
-// 7. PRODUCTION LINE SYSTEMS
-// ==========================================
+// Production Line Systems
 let spawnTimer = 0;
 let craneTimer = 0;
 
@@ -2320,40 +1678,27 @@ function updateProductionLine(dt) {
 
     // 1. Spawner
     const spawnRateLv = gameState.upgrades.spawnRate || 0;
-    const spawnMilestoneMult = getMilestoneMultiplier(spawnRateLv);
-    const spawnInterval = Math.max(0.3, (2.2 / (1 + spawnRateLv * 0.18)) / (speedMult * spawnMilestoneMult));
+    const spawnInterval = Math.max(0.3, (2.0 / (1 + spawnRateLv * 0.18)) / speedMult);
     spawnTimer += dt;
-    if (spawnTimer >= spawnInterval) {
+    if (spawnTimer >= spawnInterval && logs.length < 16) {
         spawnTimer = 0;
-        if (logs.length < 18) {
-            logs.push({
-                x: 0.5,
-                y: 3.5,
-                z: 0.2,
-                tier: gameState.woodTier,
-                state: "happy",
-                cutProgress: 0,
-                id: Math.random()
-            });
-            audio.playSfx('clunk');
-        }
+        logs.push({
+            x: 0.5, y: 3.5, z: 0.2,
+            tier: gameState.woodTier,
+            cutProgress: 0,
+            id: Math.random()
+        });
     }
 
-    // 2. Conveyor & Saws
+    // 2. Conveyor & Gantry Saws
     const convSpeedLv = gameState.upgrades.convSpeed || 0;
-    const convMilestoneMult = getMilestoneMultiplier(convSpeedLv);
-    const convSpeed = (1.5 + convSpeedLv * 0.15) * speedMult * convMilestoneMult;
+    const convSpeed = (1.6 + convSpeedLv * 0.15) * speedMult;
     const numSaws = Math.min(6, Math.max(1, gameState.upgrades.sawCount || 1));
     const sawSpeedLv = gameState.upgrades.sawSpeed || 0;
-    const sawMilestoneMult = getMilestoneMultiplier(sawSpeedLv);
-    const cutDuration = Math.max(0.2, (1.4 / (1 + sawSpeedLv * 0.2)) / (speedMult * sawMilestoneMult));
+    const cutDuration = Math.max(0.2, (1.3 / (1 + sawSpeedLv * 0.2)) / speedMult);
 
     for (let i = logs.length - 1; i >= 0; i--) {
         const log = logs[i];
-        if (log.x >= 3.0 && log.x < 4.5) {
-            log.state = "panic";
-        }
-
         if (log.x >= 4.5 && log.x < 5.0) {
             log.cutProgress += dt;
             if (Math.random() < 0.35) {
@@ -2363,7 +1708,7 @@ function updateProductionLine(dt) {
                     lp.y - 12 + (Math.random() - 0.5) * 8,
                     (Math.random() - 0.5) * 40,
                     -Math.random() * 50 - 20,
-                    Math.random() > 0.4 ? "#f6ad55" : "#ecc94b",
+                    Math.random() > 0.4 ? "#f59e0b" : "#fcd34d",
                     Math.random() * 3 + 1,
                     0.4
                 ));
@@ -2374,16 +1719,9 @@ function updateProductionLine(dt) {
                 logs.splice(i, 1);
                 gameState.stats.logsProcessed++;
 
-                const segments = 2 + Math.min(3, Math.floor((gameState.upgrades.sawSpeed || 0) / 10));
-                for (let s = 0; s < segments; s++) {
-                    planks.push({
-                        x: 5.2 + s * 0.2,
-                        y: 3.5,
-                        z: 0.2,
-                        tier: log.tier,
-                        targetStack: Math.floor(Math.random() * 3)
-                    });
-                }
+                // Chutes transfer cut lumber into the skyscraper pile
+                const segments = 3 + Math.min(3, Math.floor((gameState.upgrades.sawSpeed || 0) / 10));
+                lumberTowerCount = Math.min(25, lumberTowerCount + segments);
                 continue;
             }
         } else {
@@ -2391,154 +1729,117 @@ function updateProductionLine(dt) {
         }
     }
 
-    // 3. Sorter & Stacking Yard
-    const sortSpeedLv = gameState.upgrades.sortSpeed || 0;
-    const sortSpeed = (2.0 + sortSpeedLv * 0.2) * speedMult;
-    const stackCapLv = gameState.upgrades.stackCap || 0;
-    const maxPlanksPerStack = 6 + stackCapLv * 2;
-
-    while (stacks.length < 3) {
-        stacks.push({
-            x: 8.5,
-            y: 3.5 + stacks.length * 1.5,
-            count: 0,
-            tier: gameState.woodTier
-        });
-    }
-
-    for (let pIdx = planks.length - 1; pIdx >= 0; pIdx--) {
-        const plank = planks[pIdx];
-        const targetStack = stacks[plank.targetStack];
-
-        if (plank.x < targetStack.x) {
-            plank.x += sortSpeed * dt;
-        } else if (plank.y < targetStack.y) {
-            plank.y += sortSpeed * dt;
-        } else {
-            if (targetStack.count < maxPlanksPerStack) {
-                targetStack.count++;
-                targetStack.tier = plank.tier;
-                planks.splice(pIdx, 1);
-                audio.playSfx('clunk');
-            }
-        }
-    }
-
-    // 4. Crane System
+    // 3. Crane System
     const craneSpeedLv = gameState.upgrades.craneSpeed || 0;
     craneTimer += dt * (1 + craneSpeedLv * 0.2) * speedMult;
 
-    const fullStack = stacks.find(s => s.count >= maxPlanksPerStack);
     const numDocks = Math.min(3, Math.max(1, gameState.upgrades.dockCount || 1));
-
-    if (fullStack && trucks.some(t => t.state === "docked" && t.cargoStacks < t.maxCapacity)) {
-        if (craneTimer >= 1.5) {
-            craneTimer = 0;
-            const targetTruck = trucks.find(t => t.state === "docked" && t.cargoStacks < t.maxCapacity);
-            if (targetTruck) {
-                fullStack.count = 0;
-                targetTruck.cargoStacks++;
-                audio.playSfx('clunk');
-
-                const cp = toIso(targetTruck.x, targetTruck.y, 0.8);
-                floatingTexts.push(new FloatingText(cp.x, cp.y, "📦 Loaded!", "#68d391", 13));
-            }
-        }
-    }
-
-    // 5. Truck Fleet & Highway
-    const maxTrucks = Math.min(5, Math.max(1, gameState.upgrades.truckCount || 1));
+    const maxTrucks = Math.min(6, Math.max(1, gameState.upgrades.truckCount || 1));
     const truckCapLv = gameState.upgrades.truckCap || 0;
     const truckCapacity = 2 + Math.floor(truckCapLv / 4);
     const truckSpeedLv = gameState.upgrades.truckSpeed || 0;
     const truckSpeed = (2.2 + truckSpeedLv * 0.25) * speedMult;
 
+    // Ensure truck fleet count
     while (trucks.length < maxTrucks) {
         trucks.push({
             x: 14.0,
-            y: -2.0 - trucks.length * 2.2,
+            y: -2.0 - trucks.length * 2.4,
             cargoStacks: 0,
             maxCapacity: truckCapacity,
             state: "driving_in",
             dockIndex: trucks.length % numDocks,
-            color: ["#e53e3e", "#dd6b20", "#3182ce", "#38a169", "#805ad5"][trucks.length % 5],
+            isJammed: false,
+            id: Math.random(),
             onBridge: false
         });
     }
 
-    trucks.forEach(t => {
+    // Crane loading from Tower to Docked Truck
+    const targetTruck = trucks.find(t => t.state === "docked" && t.cargoStacks < t.maxCapacity);
+    if (lumberTowerCount >= 4 && targetTruck && craneTimer >= 1.4) {
+        craneTimer = 0;
+        lumberTowerCount = Math.max(0, lumberTowerCount - 3);
+        targetTruck.cargoStacks++;
+        const cp = toIso(targetTruck.x, targetTruck.y, 0.8);
+        floatingTexts.push(new FloatingText(cp.x, cp.y, "📦 Loaded!", "#22c55e", 13));
+    }
+
+    // Truck Movement & "Log Jam" Detection
+    let jammedCount = 0;
+    trucks.forEach((t, idx) => {
         t.maxCapacity = truckCapacity;
         const dockY = 4.0 + (t.dockIndex % numDocks) * 2.0;
 
-        if (t.state === "driving_in") {
+        // Check if blocked by vehicle ahead
+        let blocked = false;
+        for (let j = 0; j < trucks.length; j++) {
+            if (j !== idx && trucks[j].y > t.y && (trucks[j].y - t.y) < 1.8) {
+                blocked = true;
+                break;
+            }
+        }
+
+        if (blocked) {
+            t.isJammed = true;
+            jammedCount++;
+        } else {
+            t.isJammed = false;
+        }
+
+        if (!blocked && t.state === "driving_in") {
             if (t.y < dockY) {
                 t.y += truckSpeed * dt;
             } else {
                 t.state = "docked";
-                audio.playSfx('clunk');
             }
         } else if (t.state === "docked") {
             if (t.cargoStacks >= t.maxCapacity) {
                 t.state = "leaving";
-                audio.playSfx('horn');
+                audio.playSfx('honk');
             }
-        } else if (t.state === "leaving") {
+        } else if (!blocked && t.state === "leaving") {
             t.y += truckSpeed * dt;
 
             if (t.y >= 10.5 && t.y <= 13.0) {
                 t.onBridge = true;
-                if (!t.splashChecked && Math.random() < 0.015) {
-                    t.splashChecked = true;
-                    gameState.stats.splashCount++;
-                    const tp = toIso(t.x, t.y, 0);
-                    floatingTexts.push(new FloatingText(tp.x, tp.y, "💦 SPLASH!", "#63b3ed", 20));
-                    audio.playSfx('clunk');
-                    for (let k = 0; k < 25; k++) {
-                        particles.push(new Particle(tp.x, tp.y, (Math.random() - 0.5) * 80, -Math.random() * 60 - 20, "#bee3f8", 3, 0.8));
-                    }
-                }
             } else {
                 t.onBridge = false;
             }
 
+            // Delivered across the bridge! Cash Payout!
             if (t.y > 16.0) {
                 t.state = "driving_in";
                 t.y = -2.0;
-                t.splashChecked = false;
+                t.cargoStacks = 0;
                 t.onBridge = false;
 
                 const tier = WOOD_TIERS[gameState.woodTier];
                 const woodValLv = gameState.upgrades.woodValue || 0;
                 const acornMult = 1 + (gameState.goldenAcorns * 0.05);
-                const payout = Math.round(
-                    t.cargoStacks * 12 * tier.value *
-                    (1 + woodValLv * 0.15) *
-                    acornMult *
-                    speedMult
-                );
+                const payout = Math.round(t.maxCapacity * 15 * tier.value * (1 + woodValLv * 0.15) * acornMult * speedMult);
 
-                t.cargoStacks = 0;
                 gameState.coins += payout;
                 gameState.totalEarned += payout;
                 gameState.stats.deliveries++;
 
-                // Bounce coin bank
-                const coinBank = document.getElementById("hud-coin-box");
-                if (coinBank) {
-                    coinBank.classList.add("bounce");
-                    setTimeout(() => coinBank.classList.remove("bounce"), 150);
+                // Bounce cash box
+                const cashBox = document.getElementById("hud-coin-box");
+                if (cashBox) {
+                    cashBox.classList.add("bounce");
+                    setTimeout(() => cashBox.classList.remove("bounce"), 150);
                 }
 
-                audio.playSfx('coin');
+                audio.playSfx('cash');
                 const dp = toIso(14.0, 15.0, 0);
-                floatingTexts.push(new FloatingText(dp.x, dp.y - 20, `+$${formatNumber(payout)}`, "#ffcf33", 18));
+                floatingTexts.push(new FloatingText(dp.x, dp.y - 20, `+💵 ${formatNumber(payout)}`, "#22c55e", 20));
 
                 for (let c = 0; c < 12; c++) {
                     particles.push(new Particle(
                         dp.x, dp.y - 20,
                         (Math.random() - 0.5) * 70,
                         -Math.random() * 80 - 20,
-                        "#ffcf33",
+                        "#22c55e",
                         Math.random() * 3 + 2,
                         0.7
                     ));
@@ -2546,6 +1847,23 @@ function updateProductionLine(dt) {
             }
         }
     });
+
+    // Traffic Jam Alert Banner
+    const trafficBanner = document.getElementById("traffic-alert");
+    if (jammedCount >= 3) {
+        if (!isTrafficJam) {
+            isTrafficJam = true;
+            audio.playSfx('honk');
+        }
+        trafficBanner.classList.add("show");
+    } else {
+        if (isTrafficJam) {
+            isTrafficJam = false;
+            gameState.stats.jamsCleared++;
+            showToast("🎉 Log Jam Cleared! Traffic moving smoothly!");
+        }
+        trafficBanner.classList.remove("show");
+    }
 
     checkMilestones();
 }
@@ -2558,76 +1876,76 @@ function renderGameEntities(dt) {
     mainCtx.save();
     mainCtx.translate(camera.x, camera.y);
 
-    // Selected Station Pedestal Ring
-    if (selectedStation) {
-        const sp = toIso(selectedStation.x, selectedStation.y, 0);
-        mainCtx.save();
-        mainCtx.strokeStyle = "#ffcf33";
-        mainCtx.lineWidth = 3;
-        mainCtx.setLineDash([8, 6]);
-        mainCtx.lineDashOffset = -Date.now() * 0.02;
-        mainCtx.beginPath();
-        mainCtx.ellipse(sp.x, sp.y + 10, 42, 22, 0, 0, Math.PI * 2);
-        mainCtx.stroke();
-        mainCtx.restore();
-    }
+    // 1. Spawner & Conveyor Belt Line
+    drawIsoBox(mainCtx, 0.5, 3.5, 0, 1.2, 1.2, 0.8, "#475569", "#334155", "#1e293b");
+    drawIsoBox(mainCtx, 2.5, 3.5, 0, 3.2, 0.8, 0.3, "#64748b", "#475569", "#334155");
 
-    // Machinery Housings
-    drawIsoBox(mainCtx, 0.5, 3.5, 0, 1.2, 1.2, 0.8, "#4a5568", "#2d3748", "#1a202c");
-    drawIsoBox(mainCtx, 2.5, 3.5, 0, 3.2, 0.8, 0.3, "#718096", "#4a5568", "#2d3748");
-
+    // 2. Gantry Saws with Overhead Arches
     const numSaws = Math.min(6, Math.max(1, gameState.upgrades.sawCount || 1));
     for (let s = 0; s < numSaws; s++) {
         const sx = 4.5;
         const sy = 3.2 + (s - (numSaws - 1) / 2) * 0.35;
-        drawIsoBox(mainCtx, sx, sy, 0.3, 0.4, 0.4, 0.9, "#a0aec0", "#718096", "#4a5568");
 
-        const sp = toIso(sx, sy, 0.9);
+        // Overhead Gantry Pillars
+        drawIsoBox(mainCtx, sx, sy, 0.3, 0.3, 0.3, 1.1, "#1e293b", "#0f172a", "#020617");
+
+        // Spinning Circular Steel Saw
+        const sp = toIso(sx, sy, 1.1);
         mainCtx.fillStyle = "#e2e8f0";
         mainCtx.beginPath();
-        mainCtx.arc(sp.x, sp.y, 11, 0, Math.PI * 2);
+        mainCtx.arc(sp.x, sp.y, 12, 0, Math.PI * 2);
         mainCtx.fill();
-        mainCtx.strokeStyle = "#4a5568";
+        mainCtx.strokeStyle = "#94a3b8";
         mainCtx.lineWidth = 2;
         mainCtx.stroke();
     }
 
-    stacks.forEach(st => {
-        drawIsoBox(mainCtx, st.x, st.y, 0, 0.9, 0.9, 0.15, "#a0aec0", "#718096", "#4a5568");
-        if (st.count > 0) {
-            const tier = WOOD_TIERS[st.tier];
-            for (let c = 0; c < Math.min(st.count, 12); c++) {
-                drawIsoBox(mainCtx, st.x, st.y, 0.15 + c * 0.12, 0.7, 0.7, 0.1, tier.plankColor, tier.barkColor, tier.barkColor);
-            }
-        }
-    });
-
-    const cp = toIso(10.5, 5.0, 0);
-    mainCtx.fillStyle = "#e53e3e";
-    mainCtx.fillRect(cp.x - 4, cp.y - 45, 8, 45);
-    mainCtx.fillRect(cp.x - 30, cp.y - 45, 60, 6);
-
-    logs.forEach(log => drawLogEntity(mainCtx, log));
-
-    planks.forEach(plk => {
-        const tier = WOOD_TIERS[plk.tier];
-        drawIsoBox(mainCtx, plk.x, plk.y, plk.z, 0.4, 0.3, 0.1, tier.plankColor, tier.barkColor, tier.barkColor);
-    });
-
-    trucks.forEach(t => drawTruckEntity(mainCtx, t));
-
-    // Bottleneck Alert
-    if (logs.length >= 12) {
-        const ap = toIso(4.5, 3.5, 1.2);
-        mainCtx.fillStyle = "#f56565";
-        mainCtx.font = "bold 16px sans-serif";
-        mainCtx.textAlign = "center";
-        mainCtx.fillText("⚠️ UPGRADE SAWS!", ap.x, ap.y);
+    // 3. THE SKYSCRAPER LUMBER TOWER (matching 5xpM-hsYo3w.jpg)
+    const tier = WOOD_TIERS[gameState.woodTier];
+    const towerLayers = Math.min(18, Math.max(2, Math.floor(lumberTowerCount)));
+    for (let l = 0; l < towerLayers; l++) {
+        drawIsoBox(mainCtx, 8.5, 5.0, 0.15 + l * 0.18, 1.1, 1.1, 0.14, tier.plankColor, tier.barkColor, tier.barkColor);
     }
+    // Loose logs and chips around tower base
+    const baseP = toIso(8.5, 5.0, 0);
+    mainCtx.fillStyle = tier.barkColor;
+    mainCtx.fillRect(baseP.x - 28, baseP.y + 12, 14, 6);
+    mainCtx.fillRect(baseP.x + 14, baseP.y + 8, 16, 5);
+
+    // 4. Yellow Gantry Crane on Rails
+    const cp = toIso(10.5, 5.0, 0);
+    mainCtx.fillStyle = "#eab308"; // Gantry Crane Yellow
+    mainCtx.fillRect(cp.x - 5, cp.y - 50, 10, 50); // Tower
+    mainCtx.fillRect(cp.x - 35, cp.y - 50, 70, 7);  // Arm
+    mainCtx.fillStyle = "#ef4444"; // Red hoist block
+    mainCtx.fillRect(cp.x + 10, cp.y - 35, 12, 10);
+
+    // 5. In-World Diegetic 3D Upgrade Pads (UPGRADE 200 💵)
+    WORLD_UPGRADE_PADS.forEach(pad => drawWorldUpgradePad(mainCtx, pad));
+
+    // 6. Moving Logs on Conveyor
+    logs.forEach(log => {
+        const lp = toIso(log.x, log.y, log.z);
+        mainCtx.fillStyle = "rgba(0,0,0,0.2)";
+        mainCtx.beginPath();
+        mainCtx.ellipse(lp.x, lp.y + 4, 14, 7, 0, 0, Math.PI * 2);
+        mainCtx.fill();
+
+        mainCtx.fillStyle = tier.color;
+        mainCtx.beginPath();
+        mainCtx.arc(lp.x, lp.y - 10, 14, 0, Math.PI * 2);
+        mainCtx.fill();
+        mainCtx.strokeStyle = tier.barkColor;
+        mainCtx.lineWidth = 2.5;
+        mainCtx.stroke();
+    });
+
+    // 7. Delivery Trucks with Traffic Jam Emojis
+    trucks.forEach(t => drawTruckEntity(mainCtx, t));
 
     mainCtx.restore();
 
-    // Overlay Canvas
+    // Render Overlay Canvas (Particles & Floating Texts)
     uiCtx.clearRect(0, 0, w, h);
     uiCtx.save();
     uiCtx.translate(camera.x, camera.y);
@@ -2647,23 +1965,15 @@ function renderGameEntities(dt) {
     uiCtx.restore();
 }
 
-// Milestone & Achievement Checks
 function checkMilestones() {
-    let newlyClaimable = false;
     ACHIEVEMENTS.forEach(ach => {
         if (!gameState.achievements.includes(ach.id) && ach.cond(gameState)) {
             gameState.achievements.push(ach.id);
             gameState.coins += ach.reward;
-            showCelebratoryBanner(`🏆 ${ach.name}! +🪙${formatNumber(ach.reward)}`);
-            audio.playSfx('milestone');
-            newlyClaimable = true;
+            showCelebratoryBanner(`🏆 ${ach.name}! +💵 ${formatNumber(ach.reward)}`);
+            audio.playSfx('cash');
         }
     });
-
-    if (newlyClaimable) {
-        const b = document.getElementById("ach-badge");
-        if (b) b.style.display = "block";
-    }
 
     // Wood Tier progression
     if (gameState.woodTier < WOOD_TIERS.length - 1) {
@@ -2671,7 +1981,7 @@ function checkMilestones() {
         if (gameState.totalEarned >= nextTier.unlockCost) {
             gameState.woodTier++;
             showCelebratoryBanner(`🪵 Unlocked ${nextTier.name} Wood! Value x${nextTier.value}`);
-            audio.playSfx('milestone');
+            audio.playSfx('upgrade');
         }
     }
 }
@@ -2692,26 +2002,9 @@ function showToast(msg) {
     setTimeout(() => el.classList.remove("show"), 3200);
 }
 
-// ==========================================
-// 8. UPGRADE SYSTEM & LIVE EVENT LISTENERS
-// ==========================================
-function getUpgradeCost(def, currentLv, mult) {
-    let cost = 0;
-    let lv = currentLv;
-    const targetAdds = mult === "max" ? 100 : Number(mult);
+// Shop Card Management
+const shopCardsMap = new Map();
 
-    let count = 0;
-    while (count < targetAdds && lv < (def.maxLv || 100)) {
-        const singleCost = Math.round(def.baseCost * Math.pow(def.costMult, lv));
-        if (mult === "max" && (cost + singleCost > gameState.coins)) break;
-        cost += singleCost;
-        lv++;
-        count++;
-    }
-    return { cost, levelsToAdd: count };
-}
-
-// Create Card DOM nodes once, avoiding DOM destruction on every frame
 function initShopCards() {
     const list = document.getElementById("shop-list");
     if (!list) return;
@@ -2740,33 +2033,25 @@ function initShopCards() {
                         <span class="milestone-bonus js-milestone-bonus">+2x at Lv.10</span>
                     </div>
                 </div>
-                <div class="upgrade-stat-row js-stat-row">+15% efficiency</div>
+                <div class="upgrade-stat-row js-stat-row">+15% throughput</div>
             </div>
             <button class="buy-btn js-buy-btn" data-id="${def.id}">
                 <span class="buy-btn-level js-btn-level">+1</span>
-                <span class="buy-btn-cost js-btn-cost">🪙 15</span>
+                <span class="buy-btn-cost js-btn-cost">💵 15</span>
                 <span class="buy-btn-need js-btn-need" style="display:none;"></span>
             </button>
         `;
 
-        // Direct Event Listener checking live state on click
         const buyBtn = card.querySelector(".js-buy-btn");
         buyBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             handleUpgradeClick(def.id);
         });
 
-        // Clicking card inspects corresponding station
-        card.addEventListener("click", () => {
-            const st = STATIONS.find(s => s.defId === def.id || s.secondaryDefId === def.id);
-            if (st) selectStation(st);
-        });
-
         list.appendChild(card);
 
         shopCardsMap.set(def.id, {
-            card,
-            def,
+            card, def,
             lvEl: card.querySelector(".js-lv"),
             mFillEl: card.querySelector(".js-milestone-fill"),
             mLabelEl: card.querySelector(".js-milestone-label"),
@@ -2785,36 +2070,35 @@ function initShopCards() {
 
 function filterShopCategory(cat) {
     currentCategory = cat;
-    document.querySelectorAll(".cat-tab").forEach(tab => {
-        tab.classList.toggle("active", tab.dataset.cat === cat);
-    });
-
+    document.querySelectorAll(".cat-tab").forEach(tab => tab.classList.toggle("active", tab.dataset.cat === cat));
     shopCardsMap.forEach(({ card, def }) => {
-        const visible = (cat === "all" || def.category === cat);
-        card.style.display = visible ? "flex" : "none";
+        card.style.display = (cat === "all" || def.category === cat) ? "flex" : "none";
     });
 }
 
-// Live update of costs, affordable classes, and progress bars
 function updateShopUI() {
     shopCardsMap.forEach(({ card, def, lvEl, mFillEl, mLabelEl, mBonusEl, statEl, buyBtn, btnLvEl, btnCostEl, btnNeedEl }) => {
         const curLv = gameState.upgrades[def.id] || 0;
         const isMax = curLv >= (def.maxLv || 100);
-        const { cost, levelsToAdd } = getUpgradeCost(def, curLv, buyMultiplier);
-        const canAfford = !isMax && levelsToAdd > 0 && gameState.coins >= cost;
+        let cost = 0;
+        let lv = curLv;
+        const targetAdds = buyMultiplier === "max" ? 100 : Number(buyMultiplier);
+        let count = 0;
+        while (count < targetAdds && lv < (def.maxLv || 100)) {
+            const singleCost = Math.round(def.baseCost * Math.pow(def.costMult, lv));
+            if (buyMultiplier === "max" && (cost + singleCost > gameState.coins)) break;
+            cost += singleCost;
+            lv++;
+            count++;
+        }
 
-        // Level and Milestone info
+        const canAfford = !isMax && count > 0 && gameState.coins >= cost;
         lvEl.textContent = `Lv.${curLv}`;
         const milestone = getMilestoneInfo(curLv, def.maxLv);
         mFillEl.style.width = `${milestone.pct}%`;
         mLabelEl.textContent = isMax ? 'MAXED' : `${curLv}/${milestone.next}`;
         mBonusEl.textContent = milestone.isMaxMilestone ? 'Max Bonus!' : `+2x at Lv.${milestone.next}`;
 
-        // Efficiency text
-        const adds = levelsToAdd > 0 ? levelsToAdd : 1;
-        statEl.textContent = isMax ? 'Maximum Capacity reached' : `+${adds * 15}% station throughput`;
-
-        // Buy button state
         card.classList.toggle("can-buy", canAfford);
         buyBtn.classList.toggle("can-buy", canAfford);
         buyBtn.classList.toggle("disabled", !canAfford && !isMax);
@@ -2825,8 +2109,8 @@ function updateShopUI() {
             btnCostEl.textContent = 'MAX';
             btnNeedEl.style.display = 'none';
         } else {
-            btnLvEl.textContent = `+${levelsToAdd || 1}`;
-            btnCostEl.textContent = `🪙 ${formatNumber(cost)}`;
+            btnLvEl.textContent = `+${count || 1}`;
+            btnCostEl.textContent = `💵 ${formatNumber(cost)}`;
             if (!canAfford && cost > gameState.coins) {
                 btnNeedEl.style.display = 'block';
                 btnNeedEl.textContent = `Need ${formatNumber(cost - gameState.coins)}`;
@@ -2835,163 +2119,182 @@ function updateShopUI() {
             }
         }
     });
-
-    // Update Station Inspector if active
-    if (selectedStation) {
-        updateInspectorCard(selectedStation);
-    }
 }
 
 function handleUpgradeClick(defId) {
     const def = UPGRADE_DEFS.find(u => u.id === defId);
     if (!def) return;
     const curLv = gameState.upgrades[defId] || 0;
-    const { cost, levelsToAdd } = getUpgradeCost(def, curLv, buyMultiplier);
+    let cost = 0;
+    let lv = curLv;
+    const targetAdds = buyMultiplier === "max" ? 100 : Number(buyMultiplier);
+    let count = 0;
+    while (count < targetAdds && lv < (def.maxLv || 100)) {
+        const singleCost = Math.round(def.baseCost * Math.pow(def.costMult, lv));
+        if (buyMultiplier === "max" && (cost + singleCost > gameState.coins)) break;
+        cost += singleCost;
+        lv++;
+        count++;
+    }
 
-    if (levelsToAdd > 0 && gameState.coins >= cost) {
-        // Successful Purchase
+    if (count > 0 && gameState.coins >= cost) {
         gameState.coins -= cost;
-        const newLv = curLv + levelsToAdd;
+        const newLv = curLv + count;
         gameState.upgrades[defId] = newLv;
         audio.playSfx('upgrade');
 
-        // Check Milestone reach (Lv 10, 25, 50, 100)
         [10, 25, 50, 100].forEach(m => {
             if (curLv < m && newLv >= m) {
-                showCelebratoryBanner(`🎉 MILESTONE! ${def.name} reached Lv.${m}! 2x Speed Boost!`);
-                audio.playSfx('milestone');
+                showCelebratoryBanner(`🎉 MILESTONE! ${def.name} reached Lv.${m}! 2x Boost Unlocked!`);
             }
         });
 
-        // Floating level up text
         const midP = toIso(6, 4, 1.0);
-        floatingTexts.push(new FloatingText(midP.x, midP.y, `Level UP! +${levelsToAdd}`, "#48bb78", 20));
+        floatingTexts.push(new FloatingText(midP.x, midP.y, `Level UP! +${count}`, "#22c55e", 20));
 
-        // Confetti Burst
         for (let k = 0; k < 20; k++) {
             particles.push(new Particle(
                 midP.x, midP.y,
                 (Math.random() - 0.5) * 100,
                 -Math.random() * 80 - 30,
-                ["#48bb78", "#ecc94b", "#4299e1", "#f56565"][k % 4],
-                4,
-                0.8
+                ["#22c55e", "#f59e0b", "#38bdf8", "#ef4444"][k % 4],
+                4, 0.8
             ));
         }
 
         updateShopUI();
     } else {
-        // Cannot afford -> Shake animation and feedback
-        audio.playSfx('error');
         const cardObj = shopCardsMap.get(defId);
         if (cardObj) {
             cardObj.card.classList.add("shake");
             setTimeout(() => cardObj.card.classList.remove("shake"), 400);
         }
-        showToast(`Need 🪙 ${formatNumber(cost - gameState.coins)} more coins!`);
+        showToast(`Need 💵 ${formatNumber(cost - gameState.coins)} more cash!`);
     }
 }
 
-// ==========================================
-// 9. STATION INSPECTOR & CANVAS INTERACTION
-// ==========================================
-function selectStation(st) {
-    selectedStation = st;
-    audio.playSfx('tap');
-
-    const insp = document.getElementById("station-inspector");
-    insp.classList.add("show");
-    updateInspectorCard(st);
-}
-
-function updateInspectorCard(st) {
-    const insp = document.getElementById("station-inspector");
-    if (!insp) return;
-
-    document.getElementById("insp-icon").textContent = st.icon;
-    document.getElementById("insp-title").textContent = st.name;
-
-    const def = UPGRADE_DEFS.find(u => u.id === st.defId);
-    const lv = gameState.upgrades[st.defId] || 0;
-    const isBottleneck = (st.id === "saws" && logs.length >= 10) || (st.id === "yard" && stacks.every(s => s.count >= 8));
-
-    const statusEl = document.getElementById("insp-status");
-    if (isBottleneck) {
-        statusEl.className = "inspector-status bottleneck";
-        statusEl.textContent = "⚠️ Bottleneck Detected!";
-    } else {
-        statusEl.className = "inspector-status";
-        statusEl.textContent = "🟢 Running Smoothly";
-    }
-
-    const { cost, levelsToAdd } = getUpgradeCost(def, lv, 1);
-    document.getElementById("insp-stats").textContent = `Level ${lv} • Next milestone at Lv.${getMilestoneInfo(lv, def.maxLv).next}`;
-
-    const quickBuyBtn = document.getElementById("insp-quick-buy");
-    quickBuyBtn.textContent = `Upgrade (🪙 ${formatNumber(cost)})`;
-    quickBuyBtn.onclick = () => {
-        handleUpgradeClick(st.defId);
-    };
-}
+// Canvas Interaction: Tap In-World 3D Upgrade Pads directly!
+const canvasWrapper = document.getElementById("canvas-wrapper");
 
 function handleCanvasClick(e) {
     const rect = canvasWrapper.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const clickY = e.clientY - rect.top;
-
-    // Inverse Isometric Coordinates
     const gridPos = fromIso(clickX, clickY);
 
-    // Check if clicked near any defined station
-    let clickedStation = null;
-    let minDist = 2.0;
-
-    STATIONS.forEach(st => {
-        const dist = Math.hypot(st.x - gridPos.x, st.y - gridPos.y);
-        if (dist < minDist) {
-            minDist = dist;
-            clickedStation = st;
+    // Check if clicked directly on an in-world upgrade pad
+    for (const pad of WORLD_UPGRADE_PADS) {
+        if (Math.hypot(pad.x - gridPos.x, pad.y - gridPos.y) < 1.3) {
+            handleUpgradeClick(pad.defId);
+            return;
         }
-    });
-
-    if (clickedStation) {
-        selectStation(clickedStation);
-    } else {
-        // Tapped open ground -> Tap Boost
-        applyTapBoost(clickX - camera.x, clickY - camera.y);
     }
+
+    // Otherwise tap ground -> Speed Boost
+    applyTapBoost(clickX - camera.x, clickY - camera.y);
 }
 
 function applyTapBoost(localX = null, localY = null) {
     tapBoostRemaining = 8;
     gameState.stats.taps++;
-    audio.playSfx('tap');
-
     const spawnX = localX !== null ? localX : toIso(6, 4, 0.5).x;
     const spawnY = localY !== null ? localY : toIso(6, 4, 0.5).y;
-
-    floatingTexts.push(new FloatingText(spawnX, spawnY, "⚡ SPEED BOOST!", "#feb47b", 16));
-
-    // Particle ripple
-    for (let k = 0; k < 6; k++) {
-        particles.push(new Particle(
-            spawnX, spawnY,
-            (Math.random() - 0.5) * 60,
-            (Math.random() - 0.5) * 40,
-            "#f6ad55",
-            3,
-            0.5
-        ));
-    }
+    floatingTexts.push(new FloatingText(spawnX, spawnY, "⚡ SPEED BOOST!", "#f59e0b", 16));
 }
 
-// ==========================================
-// 10. MODALS & UI EVENT HANDLERS
-// ==========================================
-const canvasWrapper = document.getElementById("canvas-wrapper");
-
+// Setup Modals & Handlers
 function setupUI() {
-    // Start Screen Handlers
+    canvasWrapper.addEventListener("click", handleCanvasClick);
+
+    // Multiplier Toggle
+    document.querySelectorAll(".mult-btn").forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll(".mult-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            buyMultiplier = btn.dataset.mult;
+            updateShopUI();
+        };
+    });
+
+    // Category Tabs
+    document.querySelectorAll(".cat-tab").forEach(tab => {
+        tab.onclick = () => filterShopCategory(tab.dataset.cat);
+    });
+
+    // Mobile Drawer
+    const mobileBtn = document.getElementById("shop-toggle-mobile");
+    const shopPanel = document.getElementById("shop-panel");
+    mobileBtn.onclick = () => {
+        shopPanel.classList.toggle("open");
+        mobileBtn.textContent = shopPanel.classList.contains("open") ? "✕ Close" : "🛒 Upgrades";
+    };
+
+    // Action Pills
+    document.getElementById("btn-tap-boost").onclick = () => applyTapBoost();
+    document.getElementById("btn-watch-boost").onclick = () => {
+        watchBoostRemaining = 180;
+        showCelebratoryBanner("🎬 2X BOOST ACTIVE FOR 3 MINUTES!");
+        audio.playSfx('upgrade');
+    };
+
+    // Modals
+    document.getElementById("btn-daily").onclick = () => openModal("modal-daily");
+    document.getElementById("btn-close-daily").onclick = () => closeModal("modal-daily");
+    document.getElementById("btn-claim-daily").onclick = () => {
+        gameState.coins += 1000;
+        gameState.totalEarned += 1000;
+        audio.playSfx('cash');
+        closeModal("modal-daily");
+        showToast("Claimed 💵 1,000 Cash!");
+    };
+
+    document.getElementById("btn-achievements").onclick = openAchievementsModal;
+    document.getElementById("achievements-close").onclick = () => closeModal("modal-achievements");
+
+    document.getElementById("btn-open-leaderboard").onclick = openLeaderboardModal;
+    document.getElementById("leaderboard-close").onclick = () => closeModal("modal-leaderboard");
+    document.getElementById("btn-refresh-leaderboard").onclick = fetchLeaderboard;
+
+    document.getElementById("btn-prestige").onclick = openPrestigeModal;
+    document.getElementById("prestige-close").onclick = () => closeModal("modal-prestige");
+    document.getElementById("btn-cancel-prestige").onclick = () => closeModal("modal-prestige");
+
+    document.getElementById("btn-settings").onclick = () => {
+        document.getElementById("setting-server-url").value = gameState.settings.serverUrl || API_CONFIG.BASE_URL;
+        document.getElementById("settings-user-display").textContent = currentUser ? currentUser.username : "Guest (Device Only)";
+        document.getElementById("btn-logout").style.display = currentUser ? "block" : "none";
+        openModal("modal-settings");
+    };
+    document.getElementById("settings-close").onclick = () => closeModal("modal-settings");
+
+    document.getElementById("toggle-sfx").onclick = (e) => {
+        audio.sfxEnabled = !audio.sfxEnabled;
+        gameState.settings.sfx = audio.sfxEnabled;
+        e.target.textContent = `SFX: ${audio.sfxEnabled ? 'ON' : 'OFF'}`;
+    };
+
+    document.getElementById("btn-sync-now").onclick = () => {
+        Storage.saveLocal();
+        Storage.syncToCloud();
+        showToast("Progress Synced to Cloud!");
+    };
+
+    document.getElementById("btn-logout").onclick = () => {
+        currentUser = null;
+        localStorage.removeItem(Storage.ACTIVE_USER_KEY);
+        gameState = createDefaultState();
+        closeModal("modal-settings");
+        document.getElementById("start-screen").classList.remove("hidden");
+    };
+
+    document.getElementById("btn-reset-save").onclick = () => {
+        if (confirm("Reset all game data? This cannot be undone!")) {
+            localStorage.clear();
+            location.reload();
+        }
+    };
+
+    // Start Screen
     const startScreen = document.getElementById("start-screen");
     document.getElementById("btn-start-guest").onclick = () => {
         audio.init();
@@ -3006,110 +2309,7 @@ function setupUI() {
         openModal("modal-auth");
     };
 
-    // Canvas Clicks
-    canvasWrapper.addEventListener("click", handleCanvasClick);
-
-    // Inspector Close
-    document.getElementById("insp-close").onclick = () => {
-        selectedStation = null;
-        document.getElementById("station-inspector").classList.remove("show");
-    };
-
-    // Category Tabs
-    document.querySelectorAll(".cat-tab").forEach(tab => {
-        tab.onclick = () => filterShopCategory(tab.dataset.cat);
-    });
-
-    // Multiplier Toggle
-    document.querySelectorAll(".mult-btn").forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll(".mult-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            buyMultiplier = btn.dataset.mult;
-            updateShopUI();
-        };
-    });
-
-    // Mobile Shop Toggle
-    const mobileBtn = document.getElementById("shop-toggle-mobile");
-    const shopPanel = document.getElementById("shop-panel");
-    mobileBtn.onclick = () => {
-        shopPanel.classList.toggle("open");
-        mobileBtn.textContent = shopPanel.classList.contains("open") ? "✕ Close" : "🛒 Upgrades";
-    };
-
-    // Action Bar Buttons
-    document.getElementById("btn-tap-boost").onclick = () => applyTapBoost();
-    document.getElementById("btn-watch-boost").onclick = () => {
-        watchBoostRemaining = 180;
-        showCelebratoryBanner("🎬 2X BOOST ACTIVE FOR 3 MINUTES!");
-        audio.playSfx('upgrade');
-    };
-
-    document.getElementById("btn-daily").onclick = openDailyChestModal;
-    document.getElementById("btn-achievements").onclick = openAchievementsModal;
-    document.getElementById("btn-prestige").onclick = openPrestigeModal;
-
-    // Leaderboard
-    document.getElementById("btn-open-leaderboard").onclick = openLeaderboardModal;
-    document.getElementById("leaderboard-close").onclick = () => closeModal("modal-leaderboard");
-    document.getElementById("btn-refresh-leaderboard").onclick = fetchLeaderboard;
-
-    // Wood Tier Click
-    document.getElementById("btn-wood-tier").onclick = () => {
-        const nextTier = WOOD_TIERS[gameState.woodTier + 1];
-        if (nextTier) {
-            showToast(`Next Tier: ${nextTier.name} at 🪙${formatNumber(nextTier.unlockCost)} total revenue!`);
-        } else {
-            showToast("Maximum Wood Tier reached! (Golden Lumber 🌟)");
-        }
-    };
-
-    // Settings Modal Handlers
-    document.getElementById("btn-settings").onclick = () => {
-        document.getElementById("setting-server-url").value = gameState.settings.serverUrl || API_CONFIG.BASE_URL;
-        document.getElementById("settings-user-display").textContent = currentUser ? currentUser.username : "Guest (Device Only)";
-        document.getElementById("btn-logout").style.display = currentUser ? "block" : "none";
-        openModal("modal-settings");
-    };
-    document.getElementById("settings-close").onclick = () => closeModal("modal-settings");
-
-    document.getElementById("toggle-sfx").onclick = (e) => {
-        audio.sfxEnabled = !audio.sfxEnabled;
-        gameState.settings.sfx = audio.sfxEnabled;
-        e.target.textContent = `SFX: ${audio.sfxEnabled ? 'ON' : 'OFF'}`;
-        if (audio.sfxEnabled) audio.playSfx('coin');
-    };
-
-    document.getElementById("toggle-music").onclick = (e) => {
-        audio.musicEnabled = !audio.musicEnabled;
-        gameState.settings.music = audio.musicEnabled;
-        e.target.textContent = `Music: ${audio.musicEnabled ? 'ON' : 'OFF'}`;
-        if (audio.musicEnabled) audio.startMusic();
-    };
-
-    document.getElementById("btn-sync-now").onclick = () => {
-        Storage.saveLocal();
-        Storage.syncToCloud();
-        showToast("Progress Synced to Cloud!");
-    };
-
-    document.getElementById("btn-logout").onclick = () => {
-        currentUser = null;
-        localStorage.removeItem(Storage.ACTIVE_USER_KEY);
-        gameState = createDefaultState();
-        closeModal("modal-settings");
-        startScreen.classList.remove("hidden");
-    };
-
-    document.getElementById("btn-reset-save").onclick = () => {
-        if (confirm("Reset all game data? This cannot be undone!")) {
-            localStorage.clear();
-            location.reload();
-        }
-    };
-
-    // Auth Handlers
+    // Auth
     document.getElementById("auth-close").onclick = () => closeModal("modal-auth");
     document.getElementById("pwd-toggle").onclick = () => {
         const f = document.getElementById("auth-password");
@@ -3119,92 +2319,32 @@ function setupUI() {
     document.getElementById("btn-do-register").onclick = () => performAuth(true);
 }
 
-function openModal(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.add("active");
-}
-function closeModal(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.remove("active");
-}
+function openModal(id) { document.getElementById(id)?.classList.add("active"); }
+function closeModal(id) { document.getElementById(id)?.classList.remove("active"); }
 
-// Daily Chest Modal
-function openDailyChestModal() {
-    const grid = document.getElementById("daily-grid");
-    grid.innerHTML = "";
-    const streak = gameState.dailyStreak || 0;
-    const canClaim = (Date.now() - (gameState.lastDailyClaim || 0)) > 20 * 3600 * 1000;
-
-    DAILY_REWARDS.forEach((r, idx) => {
-        const isClaimed = idx < (streak % 7);
-        const isToday = idx === (streak % 7);
-        const card = document.createElement("div");
-        card.className = `daily-day-card ${isClaimed ? 'claimed' : ''} ${isToday ? 'today' : ''} ${r.isMega ? 'mega' : ''}`;
-        card.innerHTML = `
-            <div style="font-weight:800;">Day ${r.day}</div>
-            <div style="font-size:24px;">${r.isMega ? '🏆' : (isClaimed ? '✓' : '🎁')}</div>
-            <div style="color:var(--gold); font-weight:800;">+🪙${formatNumber(r.coins)}</div>
-            ${r.acorns ? `<div style="color:var(--gold); font-size:10px;">+🌰${r.acorns}</div>` : ''}
-        `;
-        grid.appendChild(card);
-    });
-
-    const claimBtn = document.getElementById("btn-claim-daily");
-    claimBtn.disabled = !canClaim;
-    claimBtn.textContent = canClaim ? "Claim Today's Chest" : "Come back tomorrow!";
-
-    claimBtn.onclick = () => {
-        if (!canClaim) return;
-        const reward = DAILY_REWARDS[streak % 7];
-        gameState.coins += reward.coins;
-        gameState.totalEarned += reward.coins;
-        if (reward.acorns) gameState.goldenAcorns += reward.acorns;
-        gameState.dailyStreak++;
-        gameState.lastDailyClaim = Date.now();
-        audio.playSfx('milestone');
-        showCelebratoryBanner(`🎁 Claimed Day ${reward.day}! +🪙${formatNumber(reward.coins)}`);
-        closeModal("modal-daily");
-        document.getElementById("daily-badge").style.display = "none";
-    };
-
-    document.getElementById("btn-close-daily").onclick = () => closeModal("modal-daily");
-    openModal("modal-daily");
-}
-
-// Achievements Modal
 function openAchievementsModal() {
     const list = document.getElementById("achievements-list");
     list.innerHTML = "";
-    const badge = document.getElementById("ach-badge");
-    if (badge) badge.style.display = "none";
-
-    let completedCount = 0;
     ACHIEVEMENTS.forEach(ach => {
         const isDone = gameState.achievements.includes(ach.id);
-        if (isDone) completedCount++;
-
         const card = document.createElement("div");
-        card.className = `ach-card ${isDone ? 'completed' : ''}`;
+        card.style.cssText = "background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 12px; display:flex; align-items:center; gap:12px;";
         card.innerHTML = `
-            <div class="ach-icon">${ach.icon || '🎖️'}</div>
-            <div class="ach-info">
-                <div class="ach-title">${escapeHtml(ach.name)}</div>
-                <div class="ach-desc">${escapeHtml(ach.desc)}</div>
-                <div class="ach-reward">+🪙 ${formatNumber(ach.reward)} Coins</div>
+            <div style="font-size:24px;">${ach.icon}</div>
+            <div style="flex:1;">
+                <div style="font-weight:800; font-size:13px;">${escapeHtml(ach.name)}</div>
+                <div style="font-size:11px; color:var(--text-sub);">${escapeHtml(ach.desc)}</div>
+                <div style="font-size:11px; font-weight:800; color:#22c55e;">+💵 ${formatNumber(ach.reward)}</div>
             </div>
-            <div class="ach-status-badge ${isDone ? 'claimed' : ''}">
-                ${isDone ? '✓ Claimed' : 'Locked'}
+            <div style="font-size:11px; font-weight:800; padding:4px 8px; border-radius:8px; background:${isDone ? '#15803d' : 'rgba(255,255,255,0.08)'}; color:${isDone ? '#bbf7d0' : 'var(--text-sub)'};">
+                ${isDone ? '✓ Done' : 'Locked'}
             </div>
         `;
         list.appendChild(card);
     });
-
-    document.getElementById("ach-summary-text").textContent = `Unlocked ${completedCount} / ${ACHIEVEMENTS.length} Achievements`;
-    document.getElementById("achievements-close").onclick = () => closeModal("modal-achievements");
     openModal("modal-achievements");
 }
 
-// Leaderboard Modal & API Fetch
 async function openLeaderboardModal() {
     openModal("modal-leaderboard");
     await fetchLeaderboard();
@@ -3214,7 +2354,6 @@ async function fetchLeaderboard() {
     const list = document.getElementById("leaderboard-list");
     list.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-sub);">Connecting to mill network...</div>`;
     const url = (gameState.settings.serverUrl || API_CONFIG.BASE_URL) + API_CONFIG.LEADERBOARD.path;
-
     try {
         const resp = await fetch(url, { method: "GET" });
         const data = await resp.json();
@@ -3224,86 +2363,66 @@ async function fetchLeaderboard() {
                 const isMe = currentUser && currentUser.username.toLowerCase() === user.username.toLowerCase();
                 const rankIcons = ["🥇", "🥈", "🥉"];
                 const rankLabel = idx < 3 ? rankIcons[idx] : `#${idx + 1}`;
-
                 const row = document.createElement("div");
-                row.className = `leader-row ${isMe ? 'me' : ''}`;
+                row.style.cssText = `display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:rgba(0,0,0,0.3); border:1px solid ${isMe ? '#22c55e' : 'rgba(255,255,255,0.06)'}; border-radius:12px; font-size:13px;`;
                 row.innerHTML = `
-                    <div class="leader-rank">${rankLabel}</div>
-                    <div class="leader-name">${escapeHtml(user.username)} ${isMe ? '(You)' : ''}</div>
-                    <div class="leader-score">🪙 $${formatNumber(user.totalEarned || user.coins || 0)}</div>
+                    <div style="font-weight:900; width:32px;">${rankLabel}</div>
+                    <div style="flex:1; font-weight:800;">${escapeHtml(user.username)} ${isMe ? '(You)' : ''}</div>
+                    <div style="font-weight:900; color:#22c55e;">💵 ${formatNumber(user.totalEarned || user.coins || 0)}</div>
                 `;
                 list.appendChild(row);
             });
-        } else {
-            list.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-sub);">No records yet. Be the first tycoon!</div>`;
         }
     } catch(e) {
-        list.innerHTML = `
-            <div style="text-align:center; padding: 20px; color: #fc8181;">
-                Could not reach cloud leaderboard.<br>
-                <small style="color:var(--text-sub);">Check Wi-Fi or server tunnel status.</small>
-            </div>
-        `;
+        list.innerHTML = `<div style="text-align:center; padding:20px; color:#f87171;">Could not reach cloud leaderboard.<br><small style="color:var(--text-sub);">Check Wi-Fi or server tunnel status.</small></div>`;
     }
 }
 
-// Prestige (Forest Reset)
 function openPrestigeModal() {
     const acornsToGain = Math.max(0, Math.floor(Math.sqrt((gameState.totalEarned || 0) / 10000)) - (gameState.goldenAcorns || 0));
     const nextBoost = (gameState.goldenAcorns + acornsToGain) * 5;
-
     document.getElementById("prestige-acorns-gain").textContent = `+${acornsToGain} Golden Acorns`;
     document.getElementById("prestige-boost-gain").textContent = `+${nextBoost}% Global Profit Forever`;
 
     document.getElementById("btn-do-prestige").onclick = () => {
         if (acornsToGain <= 0) {
-            showToast("Earn more coins to unlock Golden Acorns on reset!");
+            showToast("Earn more cash to unlock Golden Acorns on reset!");
             return;
         }
-
         gameState.goldenAcorns += acornsToGain;
         gameState.prestigeCount++;
         gameState.coins = 0;
         gameState.upgrades = createDefaultState().upgrades;
         logs = [];
-        planks = [];
+        lumberTowerCount = 4;
         trucks = [];
-
-        audio.playSfx('milestone');
+        audio.playSfx('upgrade');
         showCelebratoryBanner(`🌲 Forest Replanted! +${acornsToGain} Golden Acorns Claimed!`);
         closeModal("modal-prestige");
         updateShopUI();
     };
-
-    document.getElementById("prestige-close").onclick = () => closeModal("modal-prestige");
-    document.getElementById("btn-cancel-prestige").onclick = () => closeModal("modal-prestige");
     openModal("modal-prestige");
 }
 
-// Authentication Workflow
 async function performAuth(isRegister) {
     const userField = document.getElementById("auth-username");
     const pwdField = document.getElementById("auth-password");
     const msg = document.getElementById("auth-msg");
-
     const username = userField.value.trim();
     const password = pwdField.value;
 
-    if (username.length < 3 || username.length > 20) {
-        msg.className = "inline-msg error";
-        msg.textContent = "Username must be 3-20 characters.";
-        return;
-    }
-    if (password.length < 6) {
-        msg.className = "inline-msg error";
-        msg.textContent = "Password must be at least 6 characters.";
+    if (username.length < 3 || username.length > 20 || password.length < 6) {
+        msg.style.display = "block";
+        msg.style.background = "rgba(239,68,68,0.2)";
+        msg.style.color = "#f87171";
+        msg.textContent = "Username 3-20 chars, password min 6 chars.";
         return;
     }
 
     const passwordHash = await sha256(password);
     pwdField.value = "";
-
     const url = (gameState.settings.serverUrl || API_CONFIG.BASE_URL) + API_CONFIG.AUTH.path;
+
     try {
         const resp = await fetch(url, {
             method: API_CONFIG.AUTH.method,
@@ -3311,93 +2430,34 @@ async function performAuth(isRegister) {
             body: JSON.stringify({ username, passwordHash, isRegister })
         });
         const data = await resp.json();
-
         if (!data.ok) {
-            msg.className = "inline-msg error";
-            msg.textContent = data.error || "Authentication failed.";
+            msg.style.display = "block";
+            msg.textContent = data.error || "Auth failed";
             return;
         }
 
-        currentUser = {
-            username: data.user.username,
-            passwordHash,
-            token: data.token
-        };
-
+        currentUser = { username: data.user.username, passwordHash, token: data.token };
         closeModal("modal-auth");
         document.getElementById("start-screen").classList.add("hidden");
 
         const localSave = Storage.loadLocal(username);
         const cloudSave = data.save;
-
-        if (cloudSave && cloudSave.totalEarned && localSave && localSave.totalEarned && Math.abs(cloudSave.totalEarned - localSave.totalEarned) > 100) {
-            showConflictDialog(cloudSave, localSave);
-        } else if (cloudSave && cloudSave.totalEarned) {
+        if (cloudSave && cloudSave.totalEarned) {
             gameState = cloudSave;
-            onGameStarted();
-        } else {
-            if (localSave) gameState = localSave;
+        } else if (localSave) {
+            gameState = localSave;
             Storage.syncToCloud();
-            onGameStarted();
         }
-    } catch (e) {
-        msg.className = "inline-msg error";
-        msg.textContent = "Cannot reach server. Check address or Cloudflare tunnel.";
+        onGameStarted();
+    } catch(e) {
+        msg.style.display = "block";
+        msg.textContent = "Cannot reach server. Check tunnel URL.";
     }
-}
-
-function showConflictDialog(cloudSave, localSave) {
-    const details = document.getElementById("conflict-details");
-    details.innerHTML = `
-        <div>☁️ <strong>Cloud Save:</strong> $${formatNumber(cloudSave.totalEarned || 0)} total earned</div>
-        <div style="margin-top:4px;">📱 <strong>Local Save:</strong> $${formatNumber(localSave.totalEarned || 0)} total earned</div>
-    `;
-
-    document.getElementById("btn-keep-cloud").onclick = () => {
-        gameState = cloudSave;
-        closeModal("modal-conflict");
-        onGameStarted();
-    };
-
-    document.getElementById("btn-keep-local").onclick = () => {
-        gameState = localSave;
-        Storage.syncToCloud();
-        closeModal("modal-conflict");
-        onGameStarted();
-    };
-
-    document.getElementById("btn-keep-richer").onclick = () => {
-        gameState = (cloudSave.totalEarned || 0) >= (localSave.totalEarned || 0) ? cloudSave : localSave;
-        Storage.syncToCloud();
-        closeModal("modal-conflict");
-        onGameStarted();
-    };
-
-    openModal("modal-conflict");
 }
 
 function onGameStarted() {
     document.getElementById("badge-user").textContent = currentUser ? `👤 ${escapeHtml(currentUser.username)}` : "👤 Guest";
     initShopCards();
-
-    // Offline Earnings
-    if (gameState.lastSaveTime) {
-        const elapsedSec = Math.min(API_CONFIG.OFFLINE_MAX_HOURS * 3600, (Date.now() - gameState.lastSaveTime) / 1000);
-        if (elapsedSec > 60) {
-            const offlineRate = Math.max(2, (gameState.stats.deliveries > 0 ? (gameState.totalEarned / Math.max(60, gameState.stats.playTime)) : 5) * 0.4);
-            const earned = Math.round(elapsedSec * offlineRate);
-            if (earned > 20) {
-                document.getElementById("offline-earned-val").textContent = formatNumber(earned);
-                openModal("modal-welcome");
-                document.getElementById("btn-claim-offline").onclick = () => {
-                    gameState.coins += earned;
-                    gameState.totalEarned += earned;
-                    closeModal("modal-welcome");
-                    audio.playSfx('coin');
-                };
-            }
-        }
-    }
 
     // Auto-save interval
     setInterval(() => {
@@ -3406,7 +2466,13 @@ function onGameStarted() {
     }, API_CONFIG.SAVE_INTERVAL_MS);
 
     // Random Tycoon Events
-    setInterval(triggerRandomEvent, 45000);
+    setInterval(() => {
+        if (Math.random() < 0.5) {
+            rushHourRemaining = 30;
+            showCelebratoryBanner("⚡ RUSH HOUR! 2X SPEED FOR 30s!");
+            audio.playSfx('upgrade');
+        }
+    }, 45000);
 
     setTimeout(() => {
         const tut = document.getElementById("tutorial-toast");
@@ -3414,30 +2480,7 @@ function onGameStarted() {
     }, 12000);
 }
 
-function triggerRandomEvent() {
-    const roll = Math.random();
-    if (roll < 0.45) {
-        rushHourRemaining = 30;
-        showCelebratoryBanner("⚡ RUSH HOUR! 2X PRODUCTION SPEED FOR 30s!");
-        audio.playSfx('upgrade');
-    } else if (roll < 0.8) {
-        logs.push({
-            x: 0.5,
-            y: 3.5,
-            z: 0.2,
-            tier: 4,
-            state: "happy",
-            cutProgress: 0,
-            id: Math.random()
-        });
-        showToast("⭐ A Rare Golden Log entered the conveyor!");
-        gameState.stats.goldenLogs++;
-    }
-}
-
-// ==========================================
-// 11. MAIN ANIMATION LOOP
-// ==========================================
+// Main 60fps Loop
 let lastFrameTime = performance.now();
 
 function gameLoop(time) {
@@ -3457,49 +2500,27 @@ function gameLoop(time) {
         document.getElementById("coin-counter").textContent = formatNumber(gameState.coins);
         document.getElementById("acorn-count").textContent = gameState.goldenAcorns;
 
-        // Wood Tier Progression Bar in HUD
         const curTier = WOOD_TIERS[gameState.woodTier];
         document.getElementById("badge-tier-name").textContent = `🪵 ${curTier.name} Mill`;
-        document.getElementById("badge-tier-mult").textContent = `x${curTier.value} Value`;
+        document.getElementById("badge-tier-mult").textContent = `x${curTier.value}`;
 
-        const nextTier = WOOD_TIERS[gameState.woodTier + 1];
-        if (nextTier) {
-            const prevCost = curTier.unlockCost;
-            const targetCost = nextTier.unlockCost;
-            const pct = Math.min(100, Math.max(0, ((gameState.totalEarned - prevCost) / (targetCost - prevCost)) * 100));
-            document.getElementById("wood-tier-fill").style.width = `${pct}%`;
-            document.getElementById("wood-next-label").textContent = `Next: ${nextTier.name} Wood (${formatNumber(targetCost)} coins)`;
-        } else {
-            document.getElementById("wood-tier-fill").style.width = "100%";
-            document.getElementById("wood-next-label").textContent = "🌟 Maximum Wood Tier!";
-        }
+        const approxRate = (1.6 + (gameState.upgrades.convSpeed || 0) * 0.15) * 4 * curTier.value * (1 + (gameState.upgrades.woodValue || 0) * 0.15) * (1 + gameState.goldenAcorns * 0.05);
+        document.getElementById("income-counter").textContent = `+💵 ${formatNumber(approxRate)}/s`;
 
-        // Approximate income rate
-        const approxRate = (1.5 + (gameState.upgrades.convSpeed || 0) * 0.15) * 4 * curTier.value * (1 + (gameState.upgrades.woodValue || 0) * 0.15) * (1 + gameState.goldenAcorns * 0.05);
-        document.getElementById("income-counter").textContent = `+$${formatNumber(approxRate)}/s`;
-
-        // Update Upgrade Shop Affordance in real time
         updateShopUI();
     }
 
     requestAnimationFrame(gameLoop);
 }
 
-// Lifecycle Init
-window.addEventListener("beforeunload", () => {
-    Storage.saveLocal();
-});
-
-document.addEventListener("visibilitychange", () => {
-    if (document.hidden) Storage.saveLocal();
-});
+window.addEventListener("beforeunload", () => Storage.saveLocal());
+document.addEventListener("visibilitychange", () => { if (document.hidden) Storage.saveLocal(); });
 
 window.addEventListener("DOMContentLoaded", () => {
     resizeCanvases();
     setupUI();
     requestAnimationFrame(gameLoop);
 
-    // Auto-login if remembered
     try {
         const raw = localStorage.getItem(Storage.ACTIVE_USER_KEY);
         if (raw) {

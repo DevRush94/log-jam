@@ -1,0 +1,8 @@
+import urllib.request
+
+base_url1 = "https://i.ytimg.com/sb/ko3uUYdafos/storyboard3_L2/M0.jpg?sqp=-oaymwGhAUg48quKqQOYAYgBAZUBAAAEQpgBMqABPKgBBLIBQBANDBAVHyYtDg4PEhcrLCkPDhAVHyoyKQ8RFBgmPTgtERQeKjFLRzYVHCkuOUdNPyUuNz1HUlFFM0BCQ0xERkO6AUARERUjRENDQxETFi9DQ0NDFRYpQ0NDQ0MjL0NDQ0NDQ0RDQ0NDQ0JCQ0NDQ0NCQkJDQ0NDQkJCQkNDQ0JCQkJCovOX_wMGCKfOo9YG&sigh=rs$AOn4CLB2Aa6uIiYpfTy4zUEqrjsd1WDanA"
+base_url2 = "https://i.ytimg.com/sb/5xpM-hsYo3w/storyboard3_L2/M0.jpg?sqp=-oaymwGhAUg48quKqQOYAYgBAZUBAAAEQpgBMqABPKgBBLIBQBANDBAVHyYtDg4PEhcrLCkPDhAVHyoyKQ8RFBgmPTgtERQeKjFLRzYVHCkuOUdNPyUuNz1HUlFFM0BCQ0xERkO6AUARERUjRENDQxETFi9DQ0NDFRYpQ0NDQ0MjL0NDQ0NDQ0RDQ0NDQ0JCQ0NDQ0NCQkJDQ0NDQkJCQkNDQ0JCQkJCovOX_wMGCNGzzdMG&sigh=rs$AOn4CLAik-rC0QdqPeeNNtHmFZZ3_g3w-A"
+
+urllib.request.urlretrieve(base_url1, 'sb1.jpg')
+urllib.request.urlretrieve(base_url2, 'sb2.jpg')
+print("Downloaded sb1.jpg and sb2.jpg")

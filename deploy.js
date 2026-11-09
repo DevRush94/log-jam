@@ -77,3 +77,4 @@ try {
 }
 
 console.log('\n🎉 ALL DEPLOYMENTS COMPLETE!\n');
+
