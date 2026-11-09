@@ -6,3 +6,4 @@ base_url2 = "https://i.ytimg.com/sb/5xpM-hsYo3w/storyboard3_L2/M0.jpg?sqp=-oaymw
 urllib.request.urlretrieve(base_url1, 'sb1.jpg')
 urllib.request.urlretrieve(base_url2, 'sb2.jpg')
 print("Downloaded sb1.jpg and sb2.jpg")
+
