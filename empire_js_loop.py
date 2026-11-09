@@ -60,11 +60,18 @@ function animate(time) {
         spawnRollingLog();
     }
 
-    // 4. Update Rolling 3D Logs on Conveyor
+    // 4. Update Rolling 3D Logs on Conveyor & Continuous Saw Spinning
     const convSpeedLv = gameState.upgrades.convSpeed || 1;
     const sawSpeedLv = gameState.upgrades.sawSpeed || 1;
     const tylerBonus = (gameState.managers.tyler || 0) * 0.6;
     const effectiveSawSpeed = 1.0 + sawSpeedLv * 0.25 + tylerBonus;
+
+    // Saws spin continuously
+    sawMeshes.forEach((sm, sIdx) => {
+        if (sm.userData.blade) {
+            sm.userData.blade.rotation.z += dt * 20 * effectiveSawSpeed;
+        }
+    });
 
     for (let i = rollingLogs3D.length - 1; i >= 0; i--) {
         const log = rollingLogs3D[i];
@@ -78,10 +85,6 @@ function animate(time) {
 
         // Saw Blade interaction
         if (log.mesh.position.x >= -8 && log.mesh.position.x <= 2) {
-            sawMeshes.forEach(sm => {
-                if (sm.userData.blade) sm.userData.blade.rotation.z += dt * 30 * effectiveSawSpeed;
-            });
-
             // Spawn sparks
             const screenP = toScreenXY(log.mesh.position);
             for (let s = 0; s < 2; s++) {
@@ -201,6 +204,11 @@ function animate(time) {
     }
 
     updateHUD();
+
+    // 10. CRUCIAL: Render 3D Three.js Scene!
+    if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+    }
 }
 
 function spawnRollingLog() {
@@ -338,12 +346,10 @@ function checkAchievements() {
 // 6. UI SETUP & EVENT LISTENERS
 // ==========================================
 function setupUI() {
-    // Start Game
-    document.getElementById("btn-start-game").onclick = () => {
+    // Audio initialises on first touch/click anywhere
+    window.addEventListener("pointerdown", () => {
         audio.init();
-        document.getElementById("start-screen").classList.add("hidden");
-        checkOfflineEarnings();
-    };
+    }, { once: true });
 
     // Zone Navigation Pills
     document.querySelectorAll(".zone-pill").forEach(btn => {
@@ -548,6 +554,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     init3DScene();
     setupUI();
+    checkOfflineEarnings();
     requestAnimationFrame(animate);
 });
 '''

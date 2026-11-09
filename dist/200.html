@@ -37,7 +37,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #0284c7;
+            background: #dbeafe;
             font-family: var(--font-family);
             color: var(--text-main);
         }
@@ -49,6 +49,7 @@
             width: 100%;
             height: 100%;
             z-index: 1;
+            background: #dbeafe;
         }
 
         #webgl-canvas {
@@ -192,7 +193,7 @@
             box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
         }
 
-        /* Quick Action Floating Bar (Tap Boost / Unjam Alert) */
+        /* Quick Action Floating Bar */
         #quick-action-bar {
             position: absolute;
             top: 110px;
@@ -234,21 +235,26 @@
             z-index: 10;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             background: rgba(15, 23, 42, 0.92);
             border: 1px solid var(--panel-border);
-            padding: 6px 12px;
+            padding: 6px 10px;
             border-radius: 24px;
             backdrop-filter: blur(16px);
             box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-            max-width: 96vw;
+            max-width: 98vw;
+            overflow-x: auto;
+        }
+
+        #bottom-dock::-webkit-scrollbar {
+            display: none;
         }
 
         .dock-tab {
             background: transparent;
             border: none;
             color: var(--text-sub);
-            padding: 6px 12px;
+            padding: 6px 10px;
             border-radius: 16px;
             display: flex;
             flex-direction: column;
@@ -257,6 +263,7 @@
             cursor: pointer;
             transition: all 0.15s ease;
             position: relative;
+            min-width: 58px;
         }
 
         .dock-tab .tab-icon {
@@ -267,6 +274,7 @@
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.3px;
+            white-space: nowrap;
         }
 
         .dock-tab:hover {
@@ -787,28 +795,6 @@
             cursor: not-allowed;
         }
 
-        /* Start Screen */
-        #start-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, rgba(11, 17, 32, 0.88), rgba(11, 17, 32, 0.98));
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            text-align: center;
-            gap: 18px;
-        }
-
-        #start-screen.hidden {
-            display: none;
-        }
-
     </style>
 </head>
 <body>
@@ -1162,20 +1148,6 @@
             </div>
             <button class="btn-full btn-primary" id="btn-claim-offline" style="max-width: 320px; margin: 0 auto 12px;">Collect Cash</button>
         </div>
-    </div>
-
-    <!-- Start / Splash Screen -->
-    <div id="start-screen">
-        <div style="font-size: 64px; animation: bounce 1.5s infinite alternate ease-in-out;">🪵</div>
-        <h1 style="font-size: 32px; font-weight: 900; letter-spacing: -0.5px; background: linear-gradient(135deg, #10b981, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            LOG JAM: 3D LUMBER EMPIRE
-        </h1>
-        <p style="font-size: 14px; color: var(--text-sub); max-width: 360px; line-height: 1.5;">
-            Build a massive timber empire across vast forests, multi-blade sawmills, skyscraper storage yards, cargo harbors, and express highways!
-        </p>
-        <button class="btn-full btn-primary" id="btn-start-game" style="max-width: 280px; font-size: 17px; padding: 14px;">
-            START PLAYING ▶
-        </button>
     </div>
 
 <script>
@@ -2081,6 +2053,9 @@ function init3DScene() {
 
     window.addEventListener("resize", onWindowResize);
     onWindowResize();
+    if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+    }
 }
 
 function onWindowResize() {
@@ -3057,11 +3032,18 @@ function animate(time) {
         spawnRollingLog();
     }
 
-    // 4. Update Rolling 3D Logs on Conveyor
+    // 4. Update Rolling 3D Logs on Conveyor & Continuous Saw Spinning
     const convSpeedLv = gameState.upgrades.convSpeed || 1;
     const sawSpeedLv = gameState.upgrades.sawSpeed || 1;
     const tylerBonus = (gameState.managers.tyler || 0) * 0.6;
     const effectiveSawSpeed = 1.0 + sawSpeedLv * 0.25 + tylerBonus;
+
+    // Saws spin continuously
+    sawMeshes.forEach((sm, sIdx) => {
+        if (sm.userData.blade) {
+            sm.userData.blade.rotation.z += dt * 20 * effectiveSawSpeed;
+        }
+    });
 
     for (let i = rollingLogs3D.length - 1; i >= 0; i--) {
         const log = rollingLogs3D[i];
@@ -3075,10 +3057,6 @@ function animate(time) {
 
         // Saw Blade interaction
         if (log.mesh.position.x >= -8 && log.mesh.position.x <= 2) {
-            sawMeshes.forEach(sm => {
-                if (sm.userData.blade) sm.userData.blade.rotation.z += dt * 30 * effectiveSawSpeed;
-            });
-
             // Spawn sparks
             const screenP = toScreenXY(log.mesh.position);
             for (let s = 0; s < 2; s++) {
@@ -3198,6 +3176,11 @@ function animate(time) {
     }
 
     updateHUD();
+
+    // 10. CRUCIAL: Render 3D Three.js Scene!
+    if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+    }
 }
 
 function spawnRollingLog() {
@@ -3335,12 +3318,10 @@ function checkAchievements() {
 // 6. UI SETUP & EVENT LISTENERS
 // ==========================================
 function setupUI() {
-    // Start Game
-    document.getElementById("btn-start-game").onclick = () => {
+    // Audio initialises on first touch/click anywhere
+    window.addEventListener("pointerdown", () => {
         audio.init();
-        document.getElementById("start-screen").classList.add("hidden");
-        checkOfflineEarnings();
-    };
+    }, { once: true });
 
     // Zone Navigation Pills
     document.querySelectorAll(".zone-pill").forEach(btn => {
@@ -3545,6 +3526,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     init3DScene();
     setupUI();
+    checkOfflineEarnings();
     requestAnimationFrame(animate);
 });
 

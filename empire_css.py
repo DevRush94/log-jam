@@ -29,7 +29,7 @@ CSS_CONTENT = r'''
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #0284c7;
+            background: #dbeafe;
             font-family: var(--font-family);
             color: var(--text-main);
         }
@@ -41,6 +41,7 @@ CSS_CONTENT = r'''
             width: 100%;
             height: 100%;
             z-index: 1;
+            background: #dbeafe;
         }
 
         #webgl-canvas {
@@ -184,7 +185,7 @@ CSS_CONTENT = r'''
             box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
         }
 
-        /* Quick Action Floating Bar (Tap Boost / Unjam Alert) */
+        /* Quick Action Floating Bar */
         #quick-action-bar {
             position: absolute;
             top: 110px;
@@ -226,21 +227,26 @@ CSS_CONTENT = r'''
             z-index: 10;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             background: rgba(15, 23, 42, 0.92);
             border: 1px solid var(--panel-border);
-            padding: 6px 12px;
+            padding: 6px 10px;
             border-radius: 24px;
             backdrop-filter: blur(16px);
             box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-            max-width: 96vw;
+            max-width: 98vw;
+            overflow-x: auto;
+        }
+
+        #bottom-dock::-webkit-scrollbar {
+            display: none;
         }
 
         .dock-tab {
             background: transparent;
             border: none;
             color: var(--text-sub);
-            padding: 6px 12px;
+            padding: 6px 10px;
             border-radius: 16px;
             display: flex;
             flex-direction: column;
@@ -249,6 +255,7 @@ CSS_CONTENT = r'''
             cursor: pointer;
             transition: all 0.15s ease;
             position: relative;
+            min-width: 58px;
         }
 
         .dock-tab .tab-icon {
@@ -259,6 +266,7 @@ CSS_CONTENT = r'''
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.3px;
+            white-space: nowrap;
         }
 
         .dock-tab:hover {
@@ -777,27 +785,5 @@ CSS_CONTENT = r'''
             background: #334155;
             color: #64748b;
             cursor: not-allowed;
-        }
-
-        /* Start Screen */
-        #start-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, rgba(11, 17, 32, 0.88), rgba(11, 17, 32, 0.98));
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            text-align: center;
-            gap: 18px;
-        }
-
-        #start-screen.hidden {
-            display: none;
         }
 '''

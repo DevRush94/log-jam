@@ -350,18 +350,4 @@ HTML_MARKUP = r'''
             <button class="btn-full btn-primary" id="btn-claim-offline" style="max-width: 320px; margin: 0 auto 12px;">Collect Cash</button>
         </div>
     </div>
-
-    <!-- Start / Splash Screen -->
-    <div id="start-screen">
-        <div style="font-size: 64px; animation: bounce 1.5s infinite alternate ease-in-out;">🪵</div>
-        <h1 style="font-size: 32px; font-weight: 900; letter-spacing: -0.5px; background: linear-gradient(135deg, #10b981, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            LOG JAM: 3D LUMBER EMPIRE
-        </h1>
-        <p style="font-size: 14px; color: var(--text-sub); max-width: 360px; line-height: 1.5;">
-            Build a massive timber empire across vast forests, multi-blade sawmills, skyscraper storage yards, cargo harbors, and express highways!
-        </p>
-        <button class="btn-full btn-primary" id="btn-start-game" style="max-width: 280px; font-size: 17px; padding: 14px;">
-            START PLAYING ▶
-        </button>
-    </div>
 '''

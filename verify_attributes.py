@@ -21,3 +21,4 @@ for m in modals + closes:
     if f'id="{m}"' not in content:
         print(f"⚠️ Modal target {m} NOT found in HTML!")
 print("Attribute checks complete! ✓")
+

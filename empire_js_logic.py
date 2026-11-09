@@ -549,3 +549,4 @@ async function loadLeaderboardUI() {
     }
 }
 '''
+

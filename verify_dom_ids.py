@@ -18,3 +18,4 @@ if missing_ids:
     print(f"⚠️ WARNING: Missing DOM IDs found: {missing_ids}")
 else:
     print("All getElementById references match defined HTML IDs! ✓")
+

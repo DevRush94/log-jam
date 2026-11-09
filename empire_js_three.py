@@ -138,6 +138,9 @@ function init3DScene() {
 
     window.addEventListener("resize", onWindowResize);
     onWindowResize();
+    if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+    }
 }
 
 function onWindowResize() {
@@ -1053,3 +1056,4 @@ function toScreenXY(pos) {
     };
 }
 '''
+
