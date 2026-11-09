@@ -2716,3 +2716,4 @@ with open('index.html', 'w', encoding='utf-8') as f:
     f.write(html_3d)
 
 print(f"Successfully generated 3D WebGL index.html ({len(html_3d)} bytes)")
+
