@@ -17,3 +17,4 @@ print("Stderr:", res.stderr[:500])
 with open("dumped_dom.html", "w", encoding="utf-8") as f:
     f.write(res.stdout)
 print("Saved dumped_dom.html")
+

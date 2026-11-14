@@ -8,3 +8,4 @@ script_end = html.find("</script>")
 js_code = html[script_start:script_end]
 
 print("Total JS code length:", len(js_code))
+

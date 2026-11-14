@@ -74,12 +74,12 @@ const ACHIEVEMENTS = [
     { id: "golden_rebirth", name: "Golden Harvest", desc: "Rebirth your empire for Golden Acorns", reward: 25000, cond: s => s.prestigeCount >= 1 }
 ];
 
-// In-World 3D Upgrade Pads
+// In-World 3D Upgrade Pads (Matching exact positions from 5xpM-hsYo3w.jpg reference)
 const WORLD_UPGRADE_PADS = [
-    { defId: "spawnRate", label: "LUMBERJACK", icon: "🪓", pos: [-12, 0.1, -12] },
-    { defId: "sawSpeed", label: "SAW BLADE", icon: "⚡", pos: [-5, 0.1, -12] },
-    { defId: "sawCount", label: "NEW SAW LINE", icon: "🪚", pos: [2, 0.1, -12] },
-    { defId: "truckSpeed", label: "FLEET DISPATCH", icon: "🚛", pos: [8.5, 0.1, -8] }
+    { defId: "sawSpeed", label: "UPGRADE SAWS", icon: "🪚", pos: [-3.8, 0.1, -2.5] },
+    { defId: "craneSpeed", label: "UPGRADE CRANE", icon: "🏗️", pos: [3.5, 0.1, -2.5] },
+    { defId: "truckCount", label: "EXPAND FLEET", icon: "🚛", pos: [4.2, 0.1, 5.5] },
+    { defId: "spawnRate", label: "LUMBERJACK", icon: "🪓", pos: [-3.8, 0.1, 5.5] }
 ];
 
 // ==========================================

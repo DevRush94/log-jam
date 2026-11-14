@@ -9,3 +9,4 @@ if colors:
     colors.sort(reverse=True, key=lambda x: x[0])
     for count, col in colors[:10]:
         print(f"Count: {count}, Color: {col}")
+
